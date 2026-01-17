@@ -1,0 +1,2714 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App - 7 Chapters</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #0f3460;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #00d9ff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(15, 52, 96, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .timer-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 217, 255, 0.1);
+            border: 2px solid #00d9ff;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            z-index: 1000;
+            display: none;
+        }
+
+        .timer-display.active {
+            display: block;
+        }
+
+        .streak-badge {
+            display: none; /* Hidden as per user request */
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+            z-index: 1000;
+        }
+
+        .review-mode-indicator {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            flex: 1;
+            max-width: 300px;
+            padding: 20px;
+            background: rgba(15, 52, 96, 0.6);
+            border: 2px solid #0f3460;
+            border-radius: 15px;
+            color: #e0e0e0;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: #00d9ff;
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #00d9ff 0%, #0f3460 100%);
+            border-color: #00d9ff;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chapter-card {
+            background: rgba(15, 52, 96, 0.6);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #0f3460;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter-card:hover {
+            border-color: #00d9ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .chapter-card.active {
+            border-color: #00d9ff;
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .chapter-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #00d9ff;
+        }
+
+        .chapter-progress {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff 0%, #00ff88 100%);
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        .quiz-container {
+            background: rgba(15, 52, 96, 0.6);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #0f3460;
+            display: none;
+        }
+
+        .quiz-container.active {
+            display: block;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .question-number {
+            font-size: 1.1em;
+            color: #00d9ff;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: #fff;
+        }
+
+        .answers-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: #00d9ff;
+            transform: translateX(5px);
+        }
+
+        .answer-btn.selected {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: #00d9ff;
+        }
+
+        .answer-btn.correct {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .answer-btn.incorrect {
+            background: rgba(255, 68, 68, 0.2);
+            border-color: #ff4444;
+        }
+
+        .answer-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d9ff 0%, #0f3460 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(15, 52, 96, 0.8);
+            color: #00d9ff;
+            border: 2px solid #00d9ff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .feedback.incorrect {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff9999;
+        }
+
+        .results-container {
+            background: rgba(15, 52, 96, 0.6);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #0f3460;
+            text-align: center;
+            display: none;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        .results-score {
+            font-size: 3em;
+            color: #00d9ff;
+            margin: 20px 0;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+        }
+
+        .results-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .result-item {
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            color: #00ff88;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: none; /* Ascuns permanent */
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .history-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .history-content {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border: 2px solid #00d9ff;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.3);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .history-header h2 {
+            color: #00d9ff;
+            margin: 0;
+        }
+
+        .close-history {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff9999;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .close-history:hover {
+            background: rgba(255, 68, 68, 0.4);
+            transform: scale(1.05);
+        }
+
+        .history-item {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: #00d9ff;
+            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.2);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-date {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .history-mode {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .history-mode.learning {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+            color: #667eea;
+        }
+
+        .history-mode.exam {
+            background: rgba(250, 112, 154, 0.2);
+            border: 1px solid #fa709a;
+            color: #fa709a;
+        }
+
+        .history-mode.review {
+            background: rgba(247, 183, 51, 0.2);
+            border: 1px solid #f7b733;
+            color: #f7b733;
+        }
+
+        .history-mode.random {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #764ba2;
+            color: #a78bfa;
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .history-stat {
+            text-align: center;
+            padding: 10px;
+            background: rgba(15, 52, 96, 0.4);
+            border-radius: 8px;
+        }
+
+        .history-stat-label {
+            font-size: 0.85em;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .history-stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .no-history {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0a0;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+            }
+
+            .chapters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .history-content {
+                padding: 20px;
+            }
+
+            .history-details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="save-indicator" id="saveIndicator">Salvat ✓</div>
+    <div class="timer-display" id="timerDisplay">⏱️ 00:00</div>
+    <div class="streak-badge" id="streakBadge">🔥 0 zile</div>
+    
+    <div class="container">
+        <header>
+            <h1>📚 Quiz App - 7 Chapters</h1>
+            <p style="color: #a0a0a0; margin-top: 10px;">Learn and practice with questions organized by chapters</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label" id="scoreLabel">Select a chapter</div>
+                <div class="stat-value" id="totalScore">-</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Global Progress</div>
+                <div class="stat-value" id="globalProgress">0%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Complete Chapters</div>
+                <div class="stat-value" id="chaptersComplete">0/7</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Avg Time/Question</div>
+                <div class="stat-value" id="avgTime">0s</div>
+            </div>
+            <div class="stat-item" style="cursor: pointer;" onclick="showProgressHistory()" title="Click to view detailed history">
+                <div class="stat-label">📊 Progress History</div>
+                <div class="stat-value" id="historyCount">0 sessions</div>
+            </div>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" id="learningModeBtn" onclick="setMode('learning')">
+                <div style="font-size: 2em; margin-bottom: 10px;">📖</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Learning Mode</div>
+                <div style="font-size: 0.9em; color: #a0a0a0;">Instant feedback for each question</div>
+            </button>
+            <button class="mode-btn" id="examModeBtn" onclick="setMode('exam')">
+                <div style="font-size: 2em; margin-bottom: 10px;">📝</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Exam Mode</div>
+                <div style="font-size: 0.9em; color: #a0a0a0;">Results at the end, real conditions</div>
+            </button>
+            <button class="mode-btn" id="reviewModeBtn" onclick="setMode('review')">
+                <div style="font-size: 2em; margin-bottom: 10px;">🔄</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Review Mistakes</div>
+                <div style="font-size: 0.9em; color: #a0a0a0;">Repeat only wrong questions</div>
+            </button>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="mode-btn" onclick="startRandomQuiz()" style="display: inline-block; width: auto; padding: 20px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; cursor: pointer;">
+                <div style="font-size: 2em; margin-bottom: 10px;">🎲</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Random Quiz</div>
+                <div style="font-size: 0.9em; color: rgba(255,255,255,0.8);">40 random questions from all chapters</div>
+            </button>
+        </div>
+
+        <div id="chaptersView">
+            <div class="chapters-grid" id="chaptersGrid"></div>
+        </div>
+
+        <div class="quiz-container" id="quizContainer">
+            <div id="reviewModeIndicator" class="review-mode-indicator" style="display: none;">
+                🔄 Review Mode - Repeating wrong questions
+            </div>
+            
+            <div class="question-header">
+                <span class="question-number" id="questionNumber">Question 1/40</span>
+                <span style="color: #a0a0a0;" id="currentChapter">Chapter 1</span>
+            </div>
+
+            <div class="question-text" id="questionText">
+                Question text will appear here...
+            </div>
+
+            <div class="answers-grid" id="answersGrid"></div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="quiz-controls">
+                <button class="btn btn-secondary" onclick="exitQuiz()">← Back to Chapters</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Next →</button>
+            </div>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <h2 style="color: #00d9ff; margin-bottom: 20px;">🎉 Quiz Results</h2>
+            <div class="results-score" id="finalScore">0.0 points</div>
+            
+            <div class="results-details">
+                <div class="result-item">
+                    <div style="color: #a0a0a0; margin-bottom: 10px;">Correct Answers</div>
+                    <div style="font-size: 2em; color: #00ff88;" id="resultCorrect">0</div>
+                </div>
+                <div class="result-item">
+                    <div style="color: #a0a0a0; margin-bottom: 10px;">Wrong Answers</div>
+                    <div style="font-size: 2em; color: #ff4444;" id="resultIncorrect">0</div>
+                </div>
+                <div class="result-item">
+                    <div style="color: #a0a0a0; margin-bottom: 10px;">Percentage</div>
+                    <div style="font-size: 2em; color: #00d9ff;" id="resultPercentage">0%</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button class="btn btn-primary" onclick="restartQuiz()" style="margin-right: 15px;">🔄 Restart Chapter</button>
+                <button class="btn btn-secondary" onclick="exitToChapters()">← Chapters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="history-modal" id="historyModal">
+        <div class="history-content">
+            <div class="history-header">
+                <h2>📊 Istoric Progres Detaliat</h2>
+                <button class="close-history" onclick="closeProgressHistory()">✕ Închide</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure for questions
+        const quizData = {
+            1: [ // Chapter 1
+                {
+                    question: "¿Cuál es la consecuencia principal de presentar un prototipo \"sobredimensionado\" artificialmente en una etapa temprana del proceso de creación de software?",
+                    answers: ["El prototipo sorprenderá a la audiencia por su ambigüedad, permitiendo demasiada libertad descriptiva.", "Conduce a la toma de decisiones prematuras y al desarrollo de un concepto de software equivocado.", "Permite a la audiencia comprender las ideas sin abrumar con detalles superfluos.", "Facilita la estimación precisa del presupuesto al mostrar una fidelidad alta desde el inicio."],
+                    correct: 1
+                },
+                {
+                    question: "Según Bill Verplank, ¿cuál es la definición precisa de \"prototipar\"?",
+                    answers: ["Es la creación de un modelo original o primer molde con el fin de fabricar una figura en masa.", "Es cualquier intento de programar el código final de la interfaz de usuario para su validación técnica.", "Es externalizar y concretar una idea de diseño con el propósito de la evaluación.", "Es el proceso de generar documentación exhaustiva antes de comenzar cualquier representación tangible."],
+                    correct: 2
+                },
+                {
+                    question: "En el contexto del prototipado efectivo, ¿qué afirmación es verdadera respecto a las herramientas y habilidades requeridas?",
+                    answers: ["Se requiere experiencia en software gráfico avanzado para crear prototipos de alta calidad.", "Es necesario ser un desarrollador experimentado para que el prototipo sea funcional.", "No se necesitan herramientas especiales; se puede utilizar casi cualquier herramienta disponible, incluso un procesador de textos.", "El prototipado solo puede incorporarse si se planifica desde el inicio del cronograma de desarrollo, debido a su alto coste."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál de las siguientes situaciones describe mejor el riesgo de un prototipo \"infradimensionado\"?",
+                    answers: ["El presentador depende excesivamente de descripciones verbales convincentes debido a la ambigüedad del modelo.", "La audiencia se centra demasiado en detalles superfluos visuales en lugar de la funcionalidad.", "El equipo de desarrollo invierte demasiados recursos en una fidelidad visual innecesaria.", "Se toman decisiones de diseño definitivas basadas en una apariencia finalizada."],
+                    correct: 0
+                },
+                {
+                    question: "Analizando la historia del prototipado, ¿cuál fue el propósito principal de los prototipos creados por Leonardo da Vinci?",
+                    answers: ["Definir los costes de producción en masa y los moldes necesarios para la fabricación.", "Servir como pruebas de concepto e innovación, a menudo con siglos de antelación a la tecnología necesaria para construirlos.", "Comunicar diseños a los interesados y evaluar la ergonomía con los usuarios finales.", "Proteger la propiedad intelectual mediante patentes rápidas de dispositivos funcionales."],
+                    correct: 1
+                },
+                {
+                    question: "¿En qué se diferenciaba el enfoque de prototipado de Thomas Edison del de Leonardo da Vinci?",
+                    answers: ["Edison usaba los prototipos exclusivamente para la exploración conceptual sin intención de producción.", "Edison utilizaba prototipos para comunicar requisitos de fabricación y costes, no solo como fuente de innovación.", "Edison trabajaba en solitario, mientras que Da Vinci tenía un equipo de 200 operarios.", "Edison prefería los bocetos en papel y nunca construyó modelos físicos funcionales."],
+                    correct: 1
+                },
+                {
+                    question: "Henry Dreyfuss es considerado un arquetipo del diseñador industrial moderno. ¿Qué metodología clave, precursora del diseño de experiencia de usuario (UX), defendía en su proceso de prototipado?",
+                    answers: ["El diseño debe ser realizado exclusivamente por ingenieros para asegurar la viabilidad técnica.", "Los modelos deben mantenerse en dibujos bidimensionales hasta la fase final de producción.", "La participación interdisciplinar de los interesados en el diseño y la participación de los usuarios en la evaluación.", "La estética del producto es secundaria y no debe ser evaluada mediante prototipos."],
+                    correct: 2
+                },
+                {
+                    question: "En el contexto del software, ¿cómo se define el \"contenido\" de un prototipo?",
+                    answers: ["Son las herramientas de software como Visio o Visual Basic utilizadas para crearlo.", "Es el procedimiento utilizado, como wireframes o storyboards.", "Es todo aquello que está contenido en el diseño, incluyendo texto, gráficos y estructura de navegación.", "Es exclusivamente el código fuente que subyace a la interfaz gráfica."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué crítica se plantea en el texto sobre el término \"desarrollo de software\" (software development)?",
+                    answers: ["Implica erróneamente que el software es una actividad artística sin base científica.", "Sugiere que el software ya existe en una forma ideal y que el proceso finaliza inexorablemente en el programa final, ocultando su naturaleza colaborativa.", "Es un término demasiado moderno que no refleja las raíces históricas de la ingeniería.", "Debería ser sustituido por \"manufactura de software\" para asemejarse a la producción de hardware."],
+                    correct: 1
+                },
+                {
+                    question: "Según el texto, ¿cuál de las siguientes NO es una de las preguntas principales que el prototipado ayuda a responder?",
+                    answers: ["¿Funcionará el diseño correctamente?", "¿Cómo responderán los usuarios al diseño?", "¿Qué lenguaje de programación es el más eficiente para el backend?", "¿Puede ser producido el diseño económicamente?"],
+                    correct: 2
+                },
+                {
+                    question: "Cuando se utiliza un prototipo para responder \"¿Funcionará el diseño correctamente?\", ¿qué aspecto específico se está evaluando si nos preguntamos si la interfaz es intuitiva y fácil de aprender?",
+                    answers: ["La percepción del valor por parte del cliente.", "La facilidad de uso y aprendizaje (Ease of use and learning).", "La apariencia y sensaciones (Look and feel).", "La viabilidad económica de la producción."],
+                    correct: 1
+                },
+                {
+                    question: "En el entorno del software, ¿cómo difiere el concepto de \"producción económica\" respecto al hardware?",
+                    answers: ["En software, el coste se calcula sumando el precio físico de cada componente utilizado en el prototipo.", "En software, \"económico\" es irrelevante porque el código no tiene coste de materiales.", "En software, \"económico\" depende de valores organizativos, pudiendo referirse al esfuerzo de mantenimiento, soporte o tiempo de comercialización (time to market).", "En software, la producción económica se determina únicamente por el coste de las licencias de las herramientas de desarrollo."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué lección importante sobre la respuesta de los usuarios se extrae del caso del Apple Newton frente al Palm Pilot?",
+                    answers: ["Los usuarios prefieren dispositivos grandes con mayor potencia de procesamiento aunque sean pesados.", "El reconocimiento de escritura es la característica más valorada en cualquier dispositivo móvil.", "Prototipar con usuarios habría revelado si estos estaban dispuestos a cargar con un dispositivo voluminoso (Newton) frente a uno que cabe en el bolsillo (Palm Pilot).", "El éxito de mercado depende exclusivamente de la innovación tecnológica, independientemente de la usabilidad."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué se entiende por \"apariencia\" (look and feel) en el contexto de un prototipo de software?",
+                    answers: ["Es la combinación de técnicas de interacción y diseño visual, además de las respuestas emocionales elicitadas de los usuarios.", "Es únicamente el esquema de colores y logotipos corporativos aplicados a la interfaz.", "Es la velocidad de respuesta del sistema ante las peticiones del usuario.", "Es la capacidad del software para funcionar en diferentes sistemas operativos."],
+                    correct: 0
+                },
+                {
+                    question: "Para una start-up que busca capital de riesgo, ¿cuál es el valor principal de un prototipo de alta fidelidad?",
+                    answers: ["Sirve para calcular exactamente los costes de mantenimiento a largo plazo.", "Demuestra que el equipo ha trabajado una idea hasta convertirla en algo que parece un producto, probando su potencial de aceptación en el mercado.", "Sustituye la necesidad de un plan de negocios formal.", "Permite realizar pruebas de usabilidad cuantitativas exhaustivas antes de tener inversores."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es la diferencia entre un objetivo de prueba cualitativo y uno cuantitativo al usar prototipos?",
+                    answers: ["El cualitativo mide la eficacia de diferentes métodos de tareas (datos), mientras que el cuantitativo observa reacciones y sugerencias.", "El cualitativo observa la reacción del usuario y obtiene comentarios (sugerencias), mientras que el cuantitativo recolecta datos para determinar la eficacia de métodos de tareas.", "No hay diferencia, ambos buscan encontrar errores de código.", "El cualitativo utiliza prototipos de papel y el cuantitativo solo prototipos programados."],
+                    correct: 1
+                },
+                {
+                    question: "¿En qué consiste la técnica de \"prototipos modelo en blanco\" utilizada en la investigación generativa?",
+                    answers: ["En el uso de software de diseño visual sin agregar colores (blanco y negro) para centrarse en la estructura.", "En la exploración interactiva usando bloques de espuma y materiales de manualidades para que los usuarios diseñen la forma física y posición de botones.", "En entregar al usuario una hoja de papel en blanco para que dibuje lo que desea.", "En crear un prototipo de software funcional pero sin contenido real (lorem ipsum)."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el propósito principal del ejercicio con bloques de espuma (modelos en blanco)?",
+                    answers: ["Obtener un diseño refinado listo para la fabricación.", "Engañar al usuario haciéndole creer que es un producto real.", "Centrarse en el diseño, la manipulación física y el conocimiento obtenido de las preguntas de investigación, y nada más.", "Evaluar la interfaz gráfica de usuario en una pantalla simulada."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cómo puede un prototipo apoyar la especificación del diseño del producto?",
+                    answers: ["Reemplazando por completo la necesidad de documentación escrita y requisitos funcionales.", "Proporcionando una especificación de diseño mucho más concreta y verificable que las descripciones funcionales independientes.", "Sirviendo únicamente como material de marketing, sin valor técnico.", "Aumentando la ambigüedad para permitir a los desarrolladores libertad creativa total."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cómo contribuye el prototipado rápido temprano a una mejor planificación del presupuesto?",
+                    answers: ["Aumenta el coste inicial, haciendo imposible una estimación precisa.", "Proporciona una definición más precisa del alcance del trabajo, permitiendo estimaciones y programaciones con mayor confianza.", "Permite saltarse la fase de planificación y pasar directamente a la codificación.", "Es irrelevante para el presupuesto, ya que el software es impredecible."],
+                    correct: 1
+                },
+                {
+                    question: "Si la identidad corporativa de una empresa se basa en la \"elegancia\", ¿cómo afecta esto a la estrategia de prototipado económico?",
+                    answers: ["Se espera gastar un tiempo considerable trabajando sobre alternativas y perfeccionando conceptos antes de elegir un camino.", "Se deben hacer prototipos rápidos y \"sucios\" para lanzar el producto lo antes posible.", "Se debe evitar el prototipado y confiar en el instinto del diseñador senior.", "Se prioriza la funcionalidad utilitaria sobre la forma, reduciendo el número de prototipos necesarios."],
+                    correct: 0
+                },
+                {
+                    question: "¿Qué relación establece el texto entre el prototipado y la reducción del riesgo financiero?",
+                    answers: ["El prototipado aumenta el riesgo financiero al añadir una etapa costosa al proceso.", "El riesgo se reduce al permitir a los ingenieros y gerentes estimar los costes de construcción real de un diseño específico validado.", "El riesgo financiero solo se reduce si el prototipo es de baja fidelidad.", "El prototipado elimina todo riesgo financiero garantizando el éxito de ventas."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué afirmación es correcta sobre las \"características\" (characteristics) de un prototipo según el texto?",
+                    answers: ["Solo existen dos características: alta fidelidad y baja fidelidad.", "Las características se refieren exclusivamente al software utilizado (ej. Photoshop).", "Existen hasta siete características generales que permiten elegir el método adecuado, más allá de la simple distinción alta/baja fidelidad.", "Las características son los documentos de texto que acompañan al modelo."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál es una diferencia clave entre los \"métodos\" y las \"herramientas\" de prototipado?",
+                    answers: ["Los métodos son el software (ej. Word) y las herramientas son los procedimientos (ej. storyboard).", "Los métodos son los procedimientos (ej. prototipo en papel, wireframes) y las herramientas son los medios físicos o software usados para crearlos (ej. Visio, lápiz).", "No hay diferencia, son sinónimos.", "Las herramientas son teóricas y los métodos son prácticos."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué implica que un prototipo sirva para \"probar un gran concepto\" (testing a big concept)?",
+                    answers: ["Se centra en detalles tipográficos y colores finales.", "Obtiene reacciones de los usuarios a la dirección general del diseño para permitir avanzar a un diseño detallado.", "Es útil solo para correcciones de errores de código de última hora.", "Requiere necesariamente un prototipo de alta fidelidad completo."],
+                    correct: 1
+                },
+                {
+                    question: "Según la cita de Leonardo da Vinci en el texto, ¿cuál es \"el truco\" (the trick) de la vida y la invención?",
+                    answers: ["Copiar rápidamente lo que funciona.", "No fallar nunca.", "Hacer otra cosa (doing something else) después de que otros copian lo que funciona.", "Patentar las ideas antes de compartirlas."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué papel juegan los prototipos en la comunicación interna de una empresa (\"socialización\" de la idea)?",
+                    answers: ["Son artefactos que pueden atraer la atención, mostrando la idea como una realidad propuesta a los interesados (stakeholders).", "Sirven para confundir a la competencia si se filtran.", "Son útiles solo para el equipo de desarrollo, no para inversores o gerentes.", "Reemplazan a las reuniones de equipo."],
+                    correct: 0
+                },
+                {
+                    question: "¿Por qué el texto menciona que un prototipo \"no necesita ser perfecto\" para ser efectivo?",
+                    answers: ["Porque los usuarios prefieren diseños feos.", "Porque un prototipo efectivo es una mezcla justa de conceptos que expresa el estado actual de comprensión sin abrumar con detalles superfluos.", "Porque nadie nota los errores en un prototipo.", "Porque siempre se desechará el prototipo completo."],
+                    correct: 1
+                },
+                {
+                    question: "En el contexto de \"¿Funcionará el diseño correctamente?\", ¿qué significa que el prototipado \"fragmentado\" puede ser influyente?",
+                    answers: ["Que se debe romper el prototipo en pedazos físicos.", "Que probar un elemento interactivo específico (fragmento) da resultados positivos o negativos que permiten corregir la dirección antes de seguir.", "Que el diseño está desorganizado.", "Que se usan diferentes herramientas para cada pantalla."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál de las siguientes afirmaciones sobre las \"Yes Questions\" (Preguntas Sí) es FALSA según el texto?",
+                    answers: ["Cualquiera puede prototipar si entiende sus objetivos.", "Se pueden adaptar casi cualquier herramienta para crear un prototipo exitoso.", "El prototipado solo se puede incorporar si se hace en la etapa final del diseño de software.", "Se puede prototipar en el reverso de una servilleta o usando software de video."],
+                    correct: 2
+                },
+                {
+                    question: "Según el texto, la definición de prototipo ha cambiado poco en más de 90 años. ¿Cómo lo clasifican tanto el diccionario Webster de 1913 como dictionary.com hoy en día?",
+                    answers: ["Como un documento escrito de especificaciones técnicas.", "Como un modelo de un producto final (model of a final product) o forma original que sirve de base.", "Como una simulación virtual de realidad aumentada.", "Como un error en el proceso de fabricación."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué nos enseña la figura de Henry Dreyfuss sobre los \"sombreros\" (roles) de un diseñador industrial exitoso?",
+                    answers: ["El diseñador solo debe llevar el sombrero del \"artista\".", "El diseñador es usuario, diseñador y empresario todo en uno; coopera con el gestor, el ingeniero y el consumidor.", "El diseñador debe aislarse de los negocios para mantener la pureza del arte.", "El diseñador debe enfocarse únicamente en la reducción de costes de fabricación."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué motiva el prototipado de software desde el punto de vista de la \"competencia\"?",
+                    answers: ["La necesidad de copiar exactamente los productos rivales.", "La presión para mantenerse por delante de la competencia (stay ahead of the competition).", "La obligación legal de probar que no se ha infringido una patente.", "El deseo de contratar a los empleados de la competencia."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué característica de los prototipos permite evaluar si el producto es una \"inversión que vale la pena\" para el cliente?",
+                    answers: ["La percepción de valor (Customer perception of value).", "La complejidad del código fuente.", "El uso de colores primarios en la interfaz.", "La cantidad de páginas que tiene el manual de usuario."],
+                    correct: 0
+                },
+                {
+                    question: "¿Por qué el texto sugiere que los desarrolladores de software no han sido los primeros en lidiar con los desafíos del prototipado?",
+                    answers: ["Porque los arquitectos egipcios ya hacían software.", "Porque inventores históricos como Da Vinci, Edison y Dreyfuss ya usaron prototipos para innovación, requisitos y comunicación.", "Porque el software no requiere prototipos reales.", "Porque el prototipado es una invención exclusiva del siglo XXI."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es la relación entre los prototipos y los requisitos (requirements) según el texto?",
+                    answers: ["Los prototipos no deben contener requisitos, solo gráficos.", "Los requisitos (de negocio, técnicos, de usuario) son uno de los aspectos que incluye un prototipo.", "Los requisitos deben finalizarse al 100% antes de hacer el primer prototipo.", "Los prototipos sirven para eliminar los requisitos del proyecto."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué afirmación sobre el \"Diseño Participativo\" aparece en el texto?",
+                    answers: ["Es una técnica donde solo los gerentes diseñan.", "Se utiliza a menudo en la investigación generativa para involucrar más puntos de vista, especialmente la del usuario.", "Es un método obsoleto reemplazado por la IA.", "Consiste en que los usuarios programen el software final."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué sucede con la \"apariencia\" (Look and feel) si se trata de una \"experiencia de marca\" (branded experience)?",
+                    answers: ["Debe vincular (bond) al usuario con el producto.", "Debe ser genérica para ahorrar costes.", "Debe cambiar cada semana para mantener el interés.", "Es irrelevante, lo importante es que no falle."],
+                    correct: 0
+                },
+                {
+                    question: "¿Qué diferencia de \"escala\" hubo entre el enfoque de Edison y el de un inventor solitario típico?",
+                    answers: ["Edison trabajaba totalmente solo para proteger sus secretos.", "Edison utilizó un amplio equipo de más de 200 personas dividido en pequeños grupos para convertir ideas en prototipos simultáneamente.", "Edison subcontrataba todo el trabajo a otros países.", "Edison solo hacía un prototipo al año."],
+                    correct: 1
+                },
+                {
+                    question: "En las conclusiones del capítulo, ¿cómo se describe la evolución del prototipado?",
+                    answers: ["Ha pasado de ser una actividad de conceptualización a una actividad sofisticada que incluye estrategia, especificación y planificación de producto.", "Ha perdido importancia debido a las metodologías ágiles.", "Se ha simplificado para ser solo una actividad de dibujo.", "Se ha convertido en una actividad exclusiva para ingenieros de sistemas."],
+                    correct: 0
+                }
+            ],
+            2: [ // Chapter 2 - 40 questions
+                {
+                    question: "Según el material sobre el proceso de prototipado efectivo, ¿cuál es la estructura fundamental que se propone para gestionar esta actividad?",
+                    answers: ["3 Fases y 9 Pasos.", "5 Fases y 12 Pasos.", "4 Fases y 11 Pasos.", "4 Fases y 10 Pasos."],
+                    correct: 2
+                },
+                {
+                    question: "En el contexto de la \"Escalabilidad\" del prototipado, ¿cuál es el enfoque recomendado si se dispone de solo una hora para crear un prototipo?",
+                    answers: ["Omitir la fase de planificación por completo para ahorrar tiempo.", "Realizar una planificación más superficial, pero manteniendo los aspectos de planificación.", "Saltar directamente al Paso 6 (Elegir herramienta) para maximizar la producción.", "Dedicar 45 minutos a la planificación y 15 a la ejecución."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es la distinción principal entre los \"requerimientos de prototipado\" (Paso 1) y los \"requerimientos de software\" generales?",
+                    answers: ["Son idénticos y se deben tratar como sinónimos.", "Los requerimientos de prototipado son un subconjunto de los de software, basados en la audiencia y el estado actual del desarrollo.", "Los requerimientos de prototipado se enfocan exclusivamente en el hardware, mientras que los de software en el código.", "Los requerimientos de software son definidos por el cliente, mientras que los de prototipado son definidos por el usuario final exclusivamente."],
+                    correct: 1
+                },
+                {
+                    question: "Durante la Fase I (Planificación), el Paso 2 implica \"Crear un flujo de tareas/pantallas\". ¿Por qué se considera esta una actividad escalable?",
+                    answers: ["Porque siempre requiere la participación de todo el equipo de desarrollo.", "Porque solo se puede realizar utilizando software de diagramación vectorial.", "Porque puede abarcar desde una pequeña parte del sistema hasta el sistema entero, implicando a una persona o al equipo completo.", "Porque el flujo de tareas no puede evolucionar una vez definido."],
+                    correct: 2
+                },
+                {
+                    question: "Al especificar el contenido y la fidelidad (Paso 3), ¿qué enfoque metodológico se sugiere para caracterizar el prototipo?",
+                    answers: ["Asignar un nivel de fidelidad global (baja o alta) a todo el proyecto.", "Identificar primero el contenido y luego ajustar esa información a una escala de posibles niveles de fidelidad para cada tipo de contenido.", "Elegir primero la herramienta de software y dejar que esta dicte la fidelidad.", "Consultar exclusivamente al departamento de marketing sobre el branding."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál de los siguientes NO es listado en el material como un tipo de contenido sobre el cual se debe definir un nivel de fidelidad en el Paso 3?",
+                    answers: ["Diseño visual.", "Diseño de interacción y modelo navegacional.", "Código fuente backend optimizado.", "Comportamiento/rendimiento del sistema."],
+                    correct: 2
+                },
+                {
+                    question: "Según la Fase 2 (Especificación), ¿cuál es la causa principal citada de un \"prototipado no efectivo\"?",
+                    answers: ["La falta de presupuesto para herramientas caras.", "No determinar las características apropiadas del prototipo (Paso 4).", "Comenzar el diseño sin un experto en psicología cognitiva.", "No realizar pruebas de usabilidad externas."],
+                    correct: 1
+                },
+                {
+                    question: "En el Paso 4, al determinar características, se menciona un riesgo relacionado con el nivel de detalle proporcionado al público objetivo. ¿Cuál es este riesgo?",
+                    answers: ["Que el usuario se sienta abrumado y rechace el producto.", "Un uso ineficaz del tiempo, ya sea en el desarrollo o en pruebas que no capturan el feedback necesario.", "Que el prototipo se convierta en el producto final accidentalmente.", "Que los implicados internos confundan el prototipo con la versión beta."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué distinción de audiencia es crucial realizar durante el Paso 4?",
+                    answers: ["Entre usuarios expertos y novatos.", "Entre usuarios de PC y usuarios de Mac.", "Entre usuarios finales del software y los implicados (stakeholders) que ayudan a construirlo.", "Entre el equipo de marketing y el equipo de ventas."],
+                    correct: 2
+                },
+                {
+                    question: "El Paso 5 trata sobre la elección del método de prototipado. ¿Qué sucede cronológicamente en el proceso antes de este paso?",
+                    answers: ["Se selecciona la herramienta de software (Paso 6).", "Se asignan las características y contenido del prototipo al método que más se ajuste.", "Se definen las características exactas (audiencia, estado, velocidad, etc.).", "Se realiza la validación del diseño."],
+                    correct: 2
+                },
+                {
+                    question: "Al seleccionar una herramienta de prototipado (Paso 6), ¿cuál es la recomendación principal para maximizar el tiempo creativo?",
+                    answers: ["Utilizar siempre la herramienta más moderna del mercado.", "Utilizar un conjunto de habilidades que ya se posean y una herramienta con la que ya se esté familiarizado.", "Aprender una herramienta nueva para cada proyecto para mantenerse actualizado.", "Contratar a un experto externo para manejar las herramientas."],
+                    correct: 1
+                },
+                {
+                    question: "Según el material, ¿qué aplicaciones comunes se sugieren como herramientas de prototipado que quizás no se han considerado como tales?",
+                    answers: ["Photoshop e Illustrator.", "Aplicaciones Office (Word, Excel, PowerPoint), Visio y Acrobat.", "Figma y Sketch.", "Herramientas de modelado 3D como AutoCAD."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el enfoque principal de la Fase III (Diseño)?",
+                    answers: ["La planificación de recursos humanos.", "La ejecución del prototipo a través de un buen diseño.", "La validación con usuarios externos.", "La especificación técnica de requisitos funcionales."],
+                    correct: 1
+                },
+                {
+                    question: "En el Paso 7 (Formular criterios de diseño), ¿qué se considera un factor clave para crear prototipos eficaces?",
+                    answers: ["La capacidad de programar en varios lenguajes.", "La capacidad de defender el diseño del prototipo.", "El uso de colores brillantes para llamar la atención.", "La velocidad de renderizado de la herramienta."],
+                    correct: 1
+                },
+                {
+                    question: "Según el texto, ¿es necesario ser un diseñador profesional para formular criterios de diseño (Paso 7)?",
+                    answers: ["Sí, es un requisito indispensable.", "No, pero se debe contratar uno obligatoriamente.", "No, no es necesario convertirse en uno; se pueden usar mejores prácticas de guías de diseño.", "Sí, a menos que el prototipo sea de baja fidelidad."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué disciplinas se mencionan como fuentes para las guías de diseño en el Paso 7?",
+                    answers: ["Ingeniería civil y arquitectura.", "Psicología cognitiva, diseño gráfico y diseño de la información.", "Marketing digital y SEO.", "Gestión de proyectos y administración."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el objetivo de utilizar guías de diseño fundamentadas según el material?",
+                    answers: ["Asegurar que las creaciones de pantallas no se creen arbitrariamente.", "Aumentar el coste del proyecto.", "Hacer el diseño incomprensible para el público general para parecer más técnico.", "Eliminar la necesidad de explicar las decisiones de diseño."],
+                    correct: 0
+                },
+                {
+                    question: "En el Paso 8 (Crear el prototipo), ¿en qué se basa finalmente la calidad del prototipo?",
+                    answers: ["Exclusivamente en la herramienta de software utilizada.", "En la calidad de la investigación del usuario, la definición de necesidades y la propia exploración/análisis de diseño.", "En la fidelidad visual de los gráficos.", "En la cantidad de pantallas que contiene."],
+                    correct: 1
+                },
+                {
+                    question: "La Fase IV (Resultados) se describe en el texto como:",
+                    answers: ["La fase más importante e innovadora del documento.", "Una fase que no requiere atención.", "Una fase cubierta a fondo por otros textos, por lo que no se le presta mucha atención aquí.", "La única fase que requiere programación."],
+                    correct: 2
+                },
+                {
+                    question: "El Paso 9 se denomina \"Revisar el prototipo\". ¿Con qué grupo se realizan principalmente estas revisiones según la fuente?",
+                    answers: ["Con los usuarios finales exclusivamente.", "Con los implicados internos.", "Con auditores externos de calidad.", "Con el público general en redes sociales."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es la diferencia fundamental entre el Paso 9 (Revisar) y el Paso 10 (Validar)?",
+                    answers: ["El Paso 9 es técnico y el Paso 10 es financiero.", "El Paso 9 es con implicados internos para asegurar que avanza, y el Paso 10 es con implicados externos/usabilidad.", "El Paso 9 usa prototipos de alta fidelidad y el 10 de baja fidelidad.", "No hay diferencia, son sinónimos."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué actividad se asocia específicamente con el Paso 10 \"Validar el diseño\"?",
+                    answers: ["La elección de la herramienta de software.", "La creación del flujo de tareas.", "Las pruebas de usabilidad.", "La formulación de criterios de psicología cognitiva."],
+                    correct: 2
+                },
+                {
+                    question: "El Paso 11 es \"Implementar el diseño\". ¿Qué implica este paso en el contexto de un nuevo proceso de incubación de tecnología?",
+                    answers: ["Vender la patente inmediatamente.", "Plasmar el prototipo iterativo en un concepto de producto o servicio.", "Descartar el prototipo y empezar de cero con código real.", "Contratar a un equipo de marketing."],
+                    correct: 1
+                },
+                {
+                    question: "¿Para qué tipo de perfil es especialmente útil la sección de \"Resultados\" (Fase 4) según la introducción de dicha fase?",
+                    answers: ["Para el experto que lleva 20 años prototipando.", "Para el principiante que tiene poca experiencia en crear un prototipo y convertirlo en producto.", "Para el gerente que solo le interesa el presupuesto.", "Para el desarrollador backend que no interactúa con usuarios."],
+                    correct: 1
+                },
+                {
+                    question: "En la Fase 1, Paso 3 (Especificar contenido y fidelidad), se menciona el \"diseño de información\". ¿A qué categoría pertenece este elemento?",
+                    answers: ["A los métodos de prototipado.", "A los tipos de contenidos del prototipo que requieren un nivel de fidelidad.", "A las herramientas de software.", "A la fase de validación externa."],
+                    correct: 1
+                },
+                {
+                    question: "¿Por qué se dice en el material que el prototipado se utiliza para \"comunicar\"?",
+                    answers: ["Porque reemplaza al correo electrónico en la empresa.", "Porque sirve para comunicar los requisitos de software, diseños e ideas.", "Porque se usa para marketing externo exclusivamente.", "Porque es una herramienta de chat en tiempo real."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué característica tienen las \"ideas\" en el proceso de creación de software según la introducción?",
+                    answers: ["Son estáticas e inmutables.", "Deben ser perfectas desde el primer momento.", "Pueden ser iteradas, cambiadas y refinadas.", "No son relevantes para el prototipado."],
+                    correct: 2
+                },
+                {
+                    question: "Respecto a la escalabilidad de la planificación: El texto menciona que si se dedican 2 semanas a prototipar, pasar medio día planificando \"no es razonable\". ¿Qué principio ilustra esto?",
+                    answers: ["Que la planificación siempre debe durar el 50% del tiempo.", "Que los pasos del proceso deben escalarse para ajustar la actividad de prototipado.", "Que la planificación es una pérdida de tiempo en proyectos largos.", "Que se debe usar el método de \"cascada\"."],
+                    correct: 1
+                },
+                {
+                    question: "En el Paso 2, se menciona que a menudo no es fácil conocer el flujo de tareas. ¿Qué elemento adicional se debe comprender para realizarlo correctamente?",
+                    answers: ["El presupuesto del cliente.", "El contexto en el que la tarea se desarrolla.", "La versión del sistema operativo.", "El lenguaje de programación final."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué elementos definen el inicio y el fin de la Fase 2 (Especificación) en cuanto a sus pasos (4, 5, 6)?",
+                    answers: ["Comienzan con la validación y terminan con la implementación.", "Comienzan con la definición de características y terminan seleccionando una herramienta.", "Comienzan con el flujo de tareas y terminan con el diseño visual.", "Comienzan con la planificación y terminan con los resultados."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué se incluye en el material del Paso 5 para ayudar en la elección del método adecuado?",
+                    answers: ["Una licencia de software gratuita.", "Una tabla y una hoja de trabajo.", "Un video tutorial.", "Un consultor virtual."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál de las siguientes es una característica de prototipo listada en el Paso 4?",
+                    answers: ["Longevidad.", "Precio de mercado.", "Peso del archivo.", "Número de píxeles."],
+                    correct: 0
+                },
+                {
+                    question: "¿Qué relación establece el texto entre el \"prototipador experimentado\" y la Fase III (Diseño)?",
+                    answers: ["Que el experimentado se salta esta fase.", "Que para el experimentado, el buen diseño ya forma parte de su práctica profesional, por lo que los pasos pueden parecer simples.", "Que el experimentado encuentra esta fase extremadamente difícil.", "Que el experimentado delega esta fase a los novatos."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué proporciona la Fase III para el \"prototipador novato\"?",
+                    answers: ["Una licencia de software.", "Una guía práctica para aprender a crear prototipos, incluyendo pasos básicos y buenas prácticas.", "Una lista de precios de diseñadores.", "Un examen de certificación."],
+                    correct: 1
+                },
+                {
+                    question: "En el contexto del Paso 2, ¿qué pregunta debe responderse sobre la interacción del usuario?",
+                    answers: ["¿Cuánto tiempo tarda en cargar la página?", "¿Qué ocurre cuando el usuario hace clic en cierto widget (o porqué quiere hacer clic)?", "¿De qué color es el widget?", "¿Quién programó el widget?"],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué fase cubre los resultados de las decisiones hechas en los primeros tres pasos para permitir actuar?",
+                    answers: ["Fase 1: Planificación.", "Fase 2: Especificación.", "Fase 3: Diseño.", "Fase 4: Resultados."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el último paso del proceso completo de 11 pasos?",
+                    answers: ["Validar el diseño.", "Implementar el diseño.", "Revisar el prototipo.", "Lanzar al mercado."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué se entiende por \"prototipado efectivo\" en la introducción?",
+                    answers: ["Un proceso exclusivo para ingenieros senior.", "Un proceso que cualquiera interesado puede llevar a cabo para gestionar el prototipado en la creación de software.", "Un proceso automatizado por IA.", "Un proceso que garantiza cero errores en el código final."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es la relación entre las decisiones de diseño y el público general en el Paso 7?",
+                    answers: ["El diseño debe ser críptico para proteger la propiedad intelectual.", "Incluso si no es el \"mejor diseño\", debe ser comprensible para el público en general.", "El público general no importa, solo los stakeholders.", "El diseño debe ser solo comprensible para los desarrolladores."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué pasos componen la \"Fase 4: Resultados\"?",
+                    answers: ["Pasos 7, 8 y 9.", "Pasos 9, 10 y 11.", "Pasos 10 y 11 solamente.", "Pasos 8, 9, 10 y 11."],
+                    correct: 1
+                }
+            ],
+            3: [ // Chapter 3 - 40 questions
+                {
+                    question: "Según la perspectiva de Bill Buxton citada en la introducción al prototipado, ¿cuál es el \"mito demostrable\" alrededor del cual se organiza gran parte de la industria del software?",
+                    answers: ["Que los prototipos de baja fidelidad son inútiles para la validación comercial.", "Que sabemos exactamente lo que queremos al principio y cómo conseguirlo, asumiendo un camino directo y óptimo.", "Que el coste de corregir errores aumenta exponencialmente si se detectan en las fases tempranas del diseño.", "Que los requisitos funcionales deben definirse exclusivamente por el equipo de marketing antes de iniciar el diseño."],
+                    correct: 1
+                },
+                {
+                    question: "En el contexto de la planificación del prototipo, ¿cuál es la relación fundamental entre \"suposiciones\" y \"requisitos\" al inicio del proceso?",
+                    answers: ["Los requisitos deben estar completamente cerrados antes de formular cualquier suposición de diseño.", "Se debe evitar el uso de suposiciones ya que incrementan el riesgo del proyecto de software.", "El prototipado comienza con pocos requisitos y se basa en suposiciones que serán validadas, invalidadas o modificadas.", "Las suposiciones reemplazan permanentemente a los requisitos técnicos cuando estos no están disponibles."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál de los siguientes métodos es descrito como eficaz para obtener el \"contexto\" necesario que va más allá de las meras suposiciones y requisitos?",
+                    answers: ["Realizar exclusivamente un análisis de la competencia técnica.", "Crear primero un flujo de tareas y a continuación escribir un escenario que cumpla ese flujo.", "Desarrollar directamente el código final para ver cómo reacciona el usuario en tiempo real.", "Priorizar únicamente los requisitos de negocio/marketing antes de cualquier diseño visual."],
+                    correct: 1
+                },
+                {
+                    question: "Según el material, ¿qué categorías principales de requisitos se deben equilibrar antes de crear un prototipo eficaz?",
+                    answers: ["Estéticos, Políticos, Económicos y Temporales.", "Negocios/marketing, Funcionales, Técnicos y de Usabilidad.", "De hardware, De software, De red y De base de datos.", "Del cliente, Del desarrollador, Del inversor y Del usuario final."],
+                    correct: 1
+                },
+                {
+                    question: "En la \"Iteración 2\" del proceso de prototipado descrito (del wireframe rápido al wireframe), ¿qué elemento visual ayuda a clarificar los requisitos de negocio?",
+                    answers: ["El uso de colores de alta fidelidad y logotipos definitivos.", "La inclusión de código HTML funcional en los botones.", "La narrativa detallada del escenario de usuario.", "Los botones y la barra de navegación mostrados en el prototipo wireframe."],
+                    correct: 3
+                },
+                {
+                    question: "¿Qué función cumple la hoja de cálculo (Worksheet 3.1) en el proceso de transformación de suposiciones en requisitos?",
+                    answers: ["Generar automáticamente el código fuente del prototipo.", "Soportar el proceso de tres pasos: Recogida (Gather), Inventario (Inventory) y Priorización (Prioritize).", "Definir exclusivamente los costes económicos del proyecto.", "Crear los diagramas de flujo de tareas de manera gráfica."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué característica distingue a un \"diagrama de carril\" (swim lane diagram) de un diagrama de dependencia simple?",
+                    answers: ["Solo muestra las tareas sin asignar responsables.", "Visualiza los pasos, las interrelaciones y el flujo de procesos complejos asignando tareas a roles específicos (quién hace qué).", "Se utiliza exclusivamente en la fabricación industrial y no en el desarrollo de software.", "Es una representación narrativa escrita en prosa de la historia del usuario."],
+                    correct: 1
+                },
+                {
+                    question: "En un diagrama de dependencia, ¿qué indican los \"grupos\" (clusters) de tareas?",
+                    answers: ["Errores en la definición del flujo que deben eliminarse.", "Las áreas donde el software tendrá peor rendimiento.", "Tareas clave que son las más significativas y primeros candidatos para incluir en el prototipo.", "Tareas secundarias que pueden ser ignoradas en la primera versión."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué define a un \"Escenario de uso\" según el material proporcionado?",
+                    answers: ["Es un diagrama técnico de la arquitectura del servidor.", "Es la narración de un flujo de tareas en un contexto específico, como un incidente crítico o una historia cotidiana.", "Es una lista de especificaciones técnicas sin contexto.", "Es un prototipo de alta fidelidad listo para producción."],
+                    correct: 1
+                },
+                {
+                    question: "Al escribir un escenario utilizando la estructura de guion de película, ¿qué representa el \"antagonista\"?",
+                    answers: ["El jefe del usuario que le obliga a trabajar.", "Un hacker intentando romper el sistema.", "Las restricciones o limitaciones que intentan impedir que el protagonista alcance su objetivo.", "La competencia del producto de software."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál es el propósito de la \"Worksheet 4.1: Task Flow step to requirements mapping\"?",
+                    answers: ["Calcular el presupuesto del proyecto.", "Identificar los elementos necesarios en la pantalla mapeando los pasos del flujo de tareas con los requisitos/suposiciones.", "Crear el diseño gráfico final del logotipo.", "Priorizar las características de marketing sobre la usabilidad."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué se entiende por \"Baja Fidelidad\" en el contexto del prototipado?",
+                    answers: ["Prototipos que utilizan una versión beta del software actual.", "Interfaces visuales detalladas creadas con herramientas como Photoshop.", "Bocetos con atributos vagamente formados que permiten conceptualizar el diseño inicial.", "Prototipos que incluyen toda la funcionalidad del sistema y comportamiento final."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué riesgo conlleva basar el desarrollo de software mayoritariamente en suposiciones no validadas?",
+                    answers: ["Reduce el coste del proyecto significativamente.", "Aumenta el riesgo; cuanto más se base el software en suposiciones, mayor es el riesgo.", "Acelera el tiempo de desarrollo sin consecuencias negativas.", "Garantiza que el producto final será innovador."],
+                    correct: 1
+                },
+                {
+                    question: "En un diagrama de carril, ¿qué forma geométrica representa comúnmente un \"punto de decisión\"?",
+                    answers: ["Un círculo.", "Un rectángulo.", "Un rombo.", "Un triángulo."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué comprende el \"Diseño de la información\" dentro del contenido de un prototipo?",
+                    answers: ["El lenguaje visual y la composición de elementos estéticos.", "El diseño y estructura de la información, incluyendo entrada de datos, menús, tablas y gráficos.", "La forma en que el sistema responde a las acciones del usuario (flujo entre pantallas).", "La redacción de los textos de ayuda y contenido editorial."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué técnica de ajuste de fidelidad se sugiere específicamente para el diseño de la información?",
+                    answers: ["Photoshop avanzado.", "Card Sorting (clasificación de tarjetas).", "Pruebas de estrés del servidor.", "Entrevistas de marketing."],
+                    correct: 1
+                },
+                {
+                    question: "Según la iteración 4 (del storyboard al prototipo de papel), ¿qué ocurre con los requisitos?",
+                    answers: ["Se congelan y ya no pueden cambiarse.", "Comienzan a ser validados rápidamente, especialmente mediante el contacto directo con usuarios externos.", "Se vuelven más abstractos y menos tangibles.", "Se descartan para centrarse solo en la estética."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el peligro de presentar un prototipo con \"alta funcionalidad\" o apariencia muy terminada demasiado pronto?",
+                    answers: ["Que el cliente pague demasiado rápido.", "Que se consiga el efecto adverso al deseado, desviando la atención de los problemas estructurales o creando falsas expectativas.", "Que el sistema funcione demasiado lento.", "No existe ningún peligro, siempre es mejor la alta fidelidad."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué elementos definen el \"Diseño de interacción\" en un prototipo?",
+                    answers: ["La paleta de colores y la tipografía.", "La estructura y el flujo dentro de una pantalla y entre pantallas, y cómo el sistema responde a las acciones.", "La velocidad de carga de la base de datos.", "La veracidad de los datos mostrados en las tablas."],
+                    correct: 1
+                },
+                {
+                    question: "En el proceso de priorización de requisitos para el prototipo, ¿qué distinción importante se hace?",
+                    answers: ["Prioridad para su inclusión en el prototipo vs. prioridad para su aplicación en el software final.", "Prioridad de los desarrolladores vs. prioridad de los diseñadores.", "Prioridad económica vs. prioridad temporal.", "Prioridad de hardware vs. prioridad de software."],
+                    correct: 0
+                },
+                {
+                    question: "¿Qué es un \"Wireframe\" según se muestra en las iteraciones del tema 3.1?",
+                    answers: ["Una maqueta de papel dibujada a mano alzada.", "Una representación visual de baja/media fidelidad que muestra estructura y funcionalidad (ej. botones, navegación) antes del diseño visual detallado.", "El código final compilado.", "Un documento de texto sin imágenes."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué significa \"Iteración 6: del prototipo código a los requisitos software\"?",
+                    answers: ["Que se empieza a programar desde cero sin mirar el prototipo.", "Que la especificación de requisitos se deriva finalmente de un prototipo de alta fidelidad validado, permitiendo \"congelar\" los requisitos.", "Que el prototipo ha fallado y se debe volver a los requisitos iniciales.", "Que se debe contratar a un equipo de requisitos externo."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué aportan los \"Escenarios\" a la validación de usabilidad?",
+                    answers: ["Pruebas de carga automatizadas.", "Una historia de la vida real que ayuda a validar si el diseño se ajusta al contexto y necesidades del usuario.", "Diagramas UML de clases.", "Un presupuesto detallado de marketing."],
+                    correct: 1
+                },
+                {
+                    question: "En el ejemplo del diagrama de carril para un informe de gastos, ¿quiénes son algunos de los \"roles\" identificados?",
+                    answers: ["Servidor, Cliente, Router.", "Empleado, Sistema T&E, Gerente, Sistema de Contabilidad.", "Usuario A, Usuario B, Usuario C.", "Inicio, Proceso, Fin."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué método de ajuste se menciona para el \"Diseño de la interacción y modelo navegacional\" que implica explicar qué ocurrirá aunque no sea funcional?",
+                    answers: ["Narración completa.", "Interacción completa.", "Programación en Java.", "Diseño gráfico vectorial."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el primer paso en la creación de un escenario (basado en el esquema de trama)?",
+                    answers: ["Marcar los puntos en el esquema.", "Esbozar la trama (escribir un párrafo corto de cómo un usuario aplicaría la funcionalidad).", "Elegir el reparto.", "Perfilar la trama con detalles ricos."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué se debe hacer con la \"Worksheet 5.1: Determining Content fidelity\"?",
+                    answers: ["Enviarla al cliente para que la firme como contrato.", "Utilizarla para decidir el nivel apropiado de fidelidad (baja, media, alta) para cada tipo de contenido (información, interacción, visual, etc.).", "Ignorarla si el proyecto es pequeño.", "Usarla para calcular las horas de programación."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué tipo de requisitos definen \"la funcionalidad necesaria para soportar los requerimientos de negocio\"?",
+                    answers: ["Requisitos de Usabilidad.", "Requisitos Técnicos.", "Requisitos Funcionales.", "Requisitos de Marketing."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué implica la \"validación\" en el contexto del prototipado de requisitos?",
+                    answers: ["Comprobar que el código no tiene errores de sintaxis.", "Confirmar, invalidar, modificar o sustituir suposiciones y requisitos tempranamente en el proceso.", "Obtener la aprobación del presupuesto por parte del departamento financiero.", "Asegurar que el logotipo cumple con la guía de estilo."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué elemento permite \"contar la historia en el contexto del software\" durante la Iteración 3?",
+                    answers: ["El diagrama de clases.", "El Storyboard.", "El servidor de base de datos.", "La hoja de cálculo de presupuestos."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué se recomienda hacer si una lista de requisitos inicial es \"corta e imprecisa\"?",
+                    answers: ["Comenzar a programar inmediatamente para ganar tiempo.", "Asumir que estamos en las primeras etapas y reconocer que estamos abiertos a interpretación y suposiciones no validadas.", "Considerar que el proyecto está en etapas finales.", "Descartar el proyecto por falta de información."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué incluye el \"Contenido editorial\" en la fidelidad de un prototipo?",
+                    answers: ["El código fuente de la aplicación.", "El tono de voz, estilo de texto y la información escrita para el usuario.", "Las imágenes decorativas únicamente.", "La estructura de la base de datos."],
+                    correct: 1
+                },
+                {
+                    question: "¿Por qué es importante \"compartir el prototipo con los principales interesados\" (stakeholders)?",
+                    answers: ["Para que aprendan a programar.", "Para asegurar una cobertura completa de los requisitos (negocio, funcional, técnico, usabilidad).", "Para venderles el producto antes de terminarlo.", "Para que diseñen ellos la interfaz gráfica."],
+                    correct: 1
+                },
+                {
+                    question: "En el ejemplo de \"Rebecca\" (Asma Ceramics), ¿qué acción realiza el usuario que denota un flujo de tareas específico?",
+                    answers: ["Programar el sitio web en HTML.", "Suscribirse a una alerta de correo electrónico y luego hacer clic en el enlace cuando llega.", "Llamar por teléfono al servicio técnico.", "Diseñar el logotipo de la cerámica."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué nivel de fidelidad se describe como \"una versión beta del software actual\"?",
+                    answers: ["Baja fidelidad.", "Media fidelidad.", "Alta fidelidad.", "Muy alta fidelidad."],
+                    correct: 3
+                },
+                {
+                    question: "¿Qué técnica se menciona como útil para obtener requisitos de usabilidad?",
+                    answers: ["Análisis de la competencia y análisis de tareas.", "Revisión del código fuente.", "Auditoría financiera.", "Diagrama de entidad-relación."],
+                    correct: 0
+                },
+                {
+                    question: "¿Cuál es el último paso del proceso de creación de un diagrama de carril?",
+                    answers: ["Enumerar los roles.", "Colocar las tareas secuencialmente.", "Identificar y visualizar las interrelaciones (puntos de decisión, interacción con sistema, traspasos).", "Borrar el diagrama y empezar de nuevo."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué representa la \"fase de inventario\" en la hoja de trabajo de requisitos?",
+                    answers: ["Contar cuántos ordenadores hay en la oficina.", "Listar y clasificar los requisitos y suposiciones actuales del proyecto.", "Comprar las licencias de software necesarias.", "Priorizar qué se va a programar primero."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué relación tiene el \"Diseño Visual\" con la estructura del software?",
+                    answers: ["El diseño visual debe ocultar la estructura para que no se vea.", "El diseño visual utiliza elementos para expresar la estructura y el mensaje del software a los usuarios.", "El diseño visual es independiente y no tiene relación con la estructura.", "La estructura debe eliminarse en favor de un diseño visual atractivo."],
+                    correct: 1
+                },
+                {
+                    question: "¿Por qué se dice que el primer prototipo suele plantear \"más preguntas de las que resuelve\"?",
+                    answers: ["Porque está mal diseñado por definición.", "Porque como primera visualización del software, hace surgir nuevas cuestiones y requisitos que no se habían considerado.", "Porque los usuarios no saben lo que quieren.", "Porque es una pérdida de tiempo y recursos."],
+                    correct: 1
+                }
+            ],
+            4: [ // Chapter 4 - 40 questions
+                {
+                    question: "En el contexto del ciclo de prototipado, ¿cuál es la distinción fundamental del enfoque en la segunda fase (determinación de características) en comparación con la fase anterior?",
+                    answers: ["Se centra en quién va a utilizar el sistema.", "Se determina el cómo, en lugar del qué.", "Se prioriza la codificación sobre el diseño visual.", "Se define el coste económico del proyecto exclusivamente."],
+                    correct: 1
+                },
+                {
+                    question: "Para facilitar la creación modular y la comprensión de los problemas que abarcan, ¿cómo debe tratarse la estructura del prototipo?",
+                    answers: ["Debe mantenerse como un bloque monolítico para asegurar la coherencia.", "Debe descomponerse en pequeños trozos.", "Debe desarrollarse linealmente sin divisiones.", "Debe externalizarse completamente a equipos ajenos."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál de las siguientes NO es una de las 8 características principales a determinar para la creación de prototipos según el temario?",
+                    answers: ["Longevidad.", "Rentabilidad.", "Fidelidad.", "Audiencia."],
+                    correct: 1
+                },
+                {
+                    question: "Según la teoría sobre la Audiencia Interna, ¿por qué suelen ser más tolerantes estos usuarios que los externos?",
+                    answers: ["Porque no les importa la calidad del producto final.", "Porque están más familiarizados con los procesos de ingeniería que se producen.", "Porque tienen menos tiempo para revisar el prototipo.", "Porque prefieren prototipos de alta fidelidad exclusivamente."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué esperan ver inicialmente los miembros del equipo de diseño (Audiencia Interna) tras las sesiones de lluvia de ideas?",
+                    answers: ["Un prototipo con poca definición.", "Un producto final acabado.", "Un manual de usuario completo.", "Un análisis de costes de marketing."],
+                    correct: 0
+                },
+                {
+                    question: "Dentro de la Audiencia Interna, ¿cuál es la responsabilidad principal de los ingenieros de control de calidad (QA)?",
+                    answers: ["Definir el presupuesto del proyecto.", "Crear casos de prueba adecuados para evaluar el software.", "Presentar el producto a los inversores.", "Diseñar la interfaz gráfica final."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué valor específico aportan los Especialistas y Analistas de dominio como audiencia interna?",
+                    answers: ["Conocimientos sobre programación en HTML.", "Experiencia y conocimientos especializados sobre los mercados a los que se dirige la oferta.", "Capacidad para financiar el proyecto.", "Habilidades en diseño gráfico vectorial."],
+                    correct: 1
+                },
+                {
+                    question: "A diferencia de la audiencia interna, ¿qué espera encontrar generalmente una Audiencia Externa?",
+                    answers: ["Un diagrama de flujo técnico.", "Una narrativa conceptual.", "Más un producto final que un prototipo.", "Un prototipo de baja fidelidad para co-diseñar."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué ventaja crítica ofrece la Audiencia Externa durante el proceso de pruebas?",
+                    answers: ["Suelen ser más tolerantes con los errores de código.", "Capturan errores que el equipo de desarrollo no podría imaginar que existían.", "Reducen el coste de las herramientas de prototipado.", "Aceleran el proceso de programación del backend."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué preferencia de estilo e interactividad distingue a la audiencia externa de la interna?",
+                    answers: ["Prefieren la narrativa sobre la interactividad.", "Prefieren baja fidelidad y narrativa.", "Requieren mayor nivel de fidelidad e interactividad.", "Prefieren esquemas en papel estáticos."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál de las siguientes preguntas es pertinente plantearse acerca de la Audiencia Interna?",
+                    answers: ["¿Es la audiencia un usuario final?", "¿Cómo de amigable es su audiencia?", "¿Hasta qué punto se puede asumir que existe entendimiento común?", "¿Están dispuestos a pagar por el prototipo?"],
+                    correct: 2
+                },
+                {
+                    question: "Respecto a la característica de 'Estado' del prototipo, ¿cuál es el propósito de un estado 'Temprano'?",
+                    answers: ["Validar el código final.", "Poner a prueba los supuestos.", "Realizar demostraciones de ventas.", "Comprobar la integridad visual de la interfaz."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué característica define a la Velocidad 'Diligente' en el prototipado?",
+                    answers: ["Se utiliza para generar ideas rápidas y desechables.", "Permite expresar detalles precisos y es efectiva para ventas.", "Es exclusiva para las fases iniciales del diseño.", "Se realiza con bocetos a mano alzada en servilletas."],
+                    correct: 1
+                },
+                {
+                    question: "En términos de 'Longevidad', ¿qué disyuntiva principal se plantea el equipo de diseño?",
+                    answers: ["Si el prototipo será físico o digital.", "Si el prototipo será de usar y tirar, o evolucionará hacia el diseño final.", "Si el prototipo costará mucho o poco dinero.", "Si el prototipo será probado por expertos o novatos."],
+                    correct: 1
+                },
+                {
+                    question: "Según la guía para seleccionar características, ¿qué permite evitar la correcta comprensión de los 'Medios' (Físico/Digital)?",
+                    answers: ["Evitar reinventar la rueda constantemente.", "Gastar demasiado tiempo en detalles.", "Participación inadecuada de la audiencia.", "Malentendidos sobre el dominio del usuario."],
+                    correct: 0
+                },
+                {
+                    question: "¿Qué método de prototipado se describe como abstracto, interactivo y participativo, usado en las primeras etapas para determinar la estructura de navegación?",
+                    answers: ["Storyboard.", "Card Sorting.", "Mago de Oz.", "Wireframe."],
+                    correct: 1
+                },
+                {
+                    question: "En el contexto del método 'Card Sorting' descrito en el tema de métodos, ¿quiénes son los destinatarios (audiencia) principal?",
+                    answers: ["Los inversores externos.", "Los usuarios finales exclusivamente.", "Los miembros del equipo de diseño interno.", "Los competidores del mercado."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál es una característica clave del prototipado 'En papel'?",
+                    answers: ["Requiere herramientas de software avanzadas.", "La interfaz es, por lo general, completamente funcional (simulada).", "Se reserva exclusivamente para la etapa final de ventas.", "No permite entrada de voz ni interacción manual."],
+                    correct: 1
+                },
+                {
+                    question: "¿Hasta cuándo se recomienda utilizar el prototipo 'En papel'?",
+                    answers: ["Hasta que se resuelvan todos los asuntos importantes de diseño.", "Solo durante la primera reunión de brainstorming.", "Hasta que el cliente pague el anticipo.", "Solo después de haber codificado el backend."],
+                    correct: 0
+                },
+                {
+                    question: "¿Qué define fundamentalmente a un prototipo 'Digital' según el material?",
+                    answers: ["Es una aplicación final compilada.", "Es una versión digital del prototipo de papel.", "Es un vídeo de marketing.", "Es un código complejo en C++."],
+                    correct: 1
+                },
+                {
+                    question: "¿En qué situaciones se benefician especialmente los 'Focus Group' del uso de prototipos digitales?",
+                    answers: ["Cuando no hay electricidad.", "Para sesiones de creación de la idea y storyboards.", "Para la validación de código fuente.", "Para pruebas de carga del servidor."],
+                    correct: 1
+                },
+                {
+                    question: "¿En qué consiste el método 'Mago de Oz'?",
+                    answers: ["Un algoritmo de IA genera las respuestas automáticamente.", "Un miembro del equipo simula las respuestas del sistema desde una habitación adyacente.", "El usuario final imagina que el sistema funciona sin interactuar con nada.", "Se utiliza un software de magia para crear efectos visuales."],
+                    correct: 1
+                },
+                {
+                    question: "¿Para qué tipo de interfaces es especialmente útil la adaptación del método 'Mago de Oz' en etapas tempranas?",
+                    answers: ["Interfaces de línea de comandos exclusivamente.", "Interfaces que incluyen información de voz y retroalimentación de voz.", "Bases de datos SQL.", "Páginas web estáticas HTML."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué afirmación es correcta sobre la relación entre métodos y resultados en el prototipado?",
+                    answers: ["Todos los métodos logran el mismo resultado.", "Se debe usar siempre el mismo método para todos los proyectos.", "Diferentes métodos logran resultados diferentes.", "El método no influye en el resultado final."],
+                    correct: 2
+                },
+                {
+                    question: "Al elegir una herramienta de prototipado (Tema 4.3), ¿cuáles son los dos criterios principales de rendimiento que se buscan en el trabajo del proyecto?",
+                    answers: ["Precio y Popularidad.", "Eficacia y Eficiencia.", "Color y Forma.", "Hardware y Software."],
+                    correct: 1
+                },
+                {
+                    question: "Si un equipo necesita realizar una 'Prueba de concepto' rápida que pueda incorporarse fácilmente en una presentación de diseño, ¿qué Medio es el más sugerido por el texto?",
+                    answers: ["Físico.", "Digital.", "Mago de Oz.", "Codificado."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué característica de 'Velocidad' es adecuada para un prototipo que servirá como herramienta de ventas y demostración de marketing?",
+                    answers: ["Rápido.", "Diligente.", "Borrador.", "Conceptual."],
+                    correct: 1
+                },
+                {
+                    question: "En la guía para seleccionar características, ¿cuál es el primer paso (paso 1)?",
+                    answers: ["Analizar la expresión.", "Determinar el estilo.", "Especificar los requerimientos básicos: Audiencia y Tiempo.", "Escoger la herramienta de software."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué se logra confirmar mediante la correcta comprensión de las 'Velocidades' según la guía de selección?",
+                    answers: ["Que la audiencia sea externa.", "Que no se está gastando demasiado o poco tiempo en los detalles del prototipo.", "Que el prototipo sea interactivo.", "Que el medio sea digital."],
+                    correct: 1
+                },
+                {
+                    question: "Si usted está definiendo el nivel adecuado de participación de la audiencia, ¿qué característica está analizando principalmente?",
+                    answers: ["Velocidad.", "Longevidad.", "Estilo (Narrativo vs Interactivo).", "Medio."],
+                    correct: 2
+                },
+                {
+                    question: "Cuando un especialista en dominios (Audiencia Externa) es contratado, ¿qué ciclo de trabajo suele seguir?",
+                    answers: ["Solo la fase de codificación.", "Desde la comprobación de la integridad del diseño hasta la aceptación en el mercado.", "Únicamente la fase de brainstorming.", "Solo la fase de soporte técnico post-venta."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué herramienta de prototipado se menciona explícitamente como la más adecuada para todas las situaciones en el texto?",
+                    answers: ["Card Sorting.", "Wireframe.", "No se menciona ninguna herramienta única universal; se debe escoger la que mejor se adapte.", "HTML/Scripting."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué método de prototipado incluye 'Modelo blanco' y 'Vídeo' en su listado?",
+                    answers: ["No son métodos de prototipado.", "Son características, no métodos.", "Son métodos de prototipado listados en el Tema 4.2.", "Son tipos de audiencia."],
+                    correct: 2
+                },
+                {
+                    question: "¿Por qué es crucial determinar si la audiencia es Interna o Externa al inicio del prototipado?",
+                    answers: ["Para decidir quién paga el almuerzo.", "Porque las audiencias externas esperan productos finales y detectan errores inimaginables, mientras que las internas son más tolerantes.", "Porque la audiencia interna siempre requiere prototipos de alta fidelidad.", "Porque la audiencia externa prefiere narrativa sobre interactividad."],
+                    correct: 1
+                },
+                {
+                    question: "En el contexto de la 'Longevidad', si un prototipo se convierte en el diseño final del programa previsto, ¿de qué tipo de longevidad estamos hablando implícitamente?",
+                    answers: ["Corta (de usar y tirar).", "Larga (evolutiva/final).", "Inexistente.", "Conceptual."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué se entiende por 'Expresión' dentro de las características del prototipo?",
+                    answers: ["Si es físico o digital.", "Si es rápido o diligente.", "Si es conceptual o experiencial.", "Si es interno o externo."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué tipo de prototipo sería más adecuado para verificar terminología utilizada en la arquitectura de información con el equipo interno?",
+                    answers: ["Vídeo de alta definición.", "Card Sorting.", "Prototipo codificado en C++.", "Mago de Oz de voz."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué implica que un prototipo tenga una fidelidad 'baja'?",
+                    answers: ["Que funciona perfectamente sin errores.", "Que se parece poco al producto final en detalle y acabado.", "Que está hecho solo en formato digital.", "Que está dirigido a una audiencia externa exigente."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el riesgo de no determinar correctamente las características antes de prototipar?",
+                    answers: ["Que el software sea demasiado barato.", "Perder recursos de diseño en actividades redundantes o innecesarias.", "Que la audiencia interna se vuelva intolerante.", "Que se utilicen demasiadas herramientas a la vez."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué elemento se utiliza en el Tema 4.3 para ayudar en el proceso de decisión de la herramienta?",
+                    answers: ["Una bola de cristal.", "Una hoja de trabajo (worksheet).", "Un algoritmo complejo.", "Una votación a mano alzada."],
+                    correct: 1
+                }
+            ],
+            5: [ // Chapter 5 - 40 questions
+                {
+                    question: "En el contexto del ciclo de prototipado, ¿cuál es el objetivo principal de la tercera fase (Establecer el criterio de diseño)?",
+                    answers: ["Codificar la interfaz final utilizando herramientas de desarrollo de software.", "Determinar cómo se utilizará la información y las herramientas, así como la organización y navegación del prototipo.", "Realizar pruebas de usabilidad con usuarios finales para validar el esquema de colores.", "Definir los requisitos de negocio y el presupuesto del proyecto."],
+                    correct: 1
+                },
+                {
+                    question: "Al seleccionar los criterios de diseño, además de categorizarlos en diseño visual o interfaz de usuario, ¿qué atributo adicional se le otorga a cada directriz?",
+                    answers: ["Prioridad o Coste.", "Estética o Funcionalidad.", "Organización o Dirección.", "Accesibilidad o Usabilidad."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál es la función principal de una directriz de tipo \"organizativa\" dentro de los criterios de diseño?",
+                    answers: ["Guiar el ojo del usuario a través de la pantalla.", "Determinar la velocidad de respuesta del sistema.", "Ayudar en la decisión de dónde colocar los elementos en la disposición de una pantalla o página.", "Establecer el esquema de colores y tipografía."],
+                    correct: 2
+                },
+                {
+                    question: "Según las Guías Visuales de Diseño, ¿qué regla fundamental rige el \"Flujo de información\"?",
+                    answers: ["Los elementos más grandes deben ir siempre en el centro.", "Se debe priorizar la estética sobre la funcionalidad.", "Colocar siempre la información más importante en los primeros puntos (prioritarios).", "La información debe estar oculta hasta que el usuario la solicite."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué efecto tiene un flujo de información adecuado en una pantalla según la teoría expuesta?",
+                    answers: ["Hace que la pantalla sea más colorida.", "Facilita la lectura y navegación al hacer que los elementos críticos sean más fáciles de encontrar e identificar.", "Aumenta la carga cognitiva del usuario para mantener su atención.", "Reduce el espacio blanco disponible en la interfaz."],
+                    correct: 1
+                },
+                {
+                    question: "Dentro de las Guías de Interfaces de Usuario, ¿qué pregunta clave ayuda a definir el diseño de la interacción?",
+                    answers: ["¿Cuántos colores soporta el monitor del usuario?", "¿Cuál es el presupuesto para el desarrollo del backend?", "¿Cómo se comporta y responde la interfaz a la interacción del usuario?", "¿Qué base de datos se utilizará para almacenar la información?"],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál de las siguientes directrices se clasifica como una directriz de \"Interfaz de Usuario\" y tiene un atributo \"Direccional\"?",
+                    answers: ["Agrupación lógica.", "Estructura tipográfica.", "Revelación progresiva.", "Accesibilidad universal."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué técnica NO se considera una estrategia de \"Revelación progresiva\" según el material?",
+                    answers: ["Menús de comandos.", "Hojas de Propiedades.", "Desplazamiento (Scrolling) infinito.", "Enlaces."],
+                    correct: 2
+                },
+                {
+                    question: "En relación con la guía de \"Rendimiento\" (Efficiency), ¿qué recomendación se hace respecto al desplazamiento (scrolling)?",
+                    answers: ["Se debe utilizar desplazamiento en ambas direcciones (horizontal y vertical) para maximizar el espacio.", "El desplazamiento es preferible a la paginación en todos los casos.", "Si se utiliza desplazamiento, debe elegirse solo una dirección (preferiblemente vertical).", "El desplazamiento debe ser automático sin intervención del usuario."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué implica la \"Facilidad de aprendizaje\" (Learnability) en el diseño de un prototipo?",
+                    answers: ["Que el usuario debe leer el manual antes de usar el sistema.", "Que el usuario debe ser capaz de reutilizar conocimientos actuales y adquiridos para aprender a utilizar el resto de la aplicación.", "Que la interfaz debe ser completamente nueva y original, sin parecerse a sistemas anteriores.", "Que el sistema debe tener un tutorial obligatorio al inicio."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es la primera estrategia mencionada para lograr la \"Facilidad de aprendizaje\"?",
+                    answers: ["Utilizar el mayor número de iconos posible.", "Aprovechar los conocimientos y experiencia de los usuarios mediante el uso de metáforas y modelos de interacción.", "Reducir el número de opciones en el menú.", "Utilizar colores brillantes para llamar la atención."],
+                    correct: 1
+                },
+                {
+                    question: "Para mejorar la facilidad de aprendizaje, el material sugiere utilizar convenciones familiares para el usuario. ¿Qué elementos se mencionan específicamente como ejemplos de estas convenciones?",
+                    answers: ["Algoritmos de encriptación.", "Modelos de interacción, diseños de menú, iconos y widgets.", "Hardware de última generación.", "Lenguajes de programación backend."],
+                    correct: 1
+                },
+                {
+                    question: "Según la tercera estrategia de \"Facilidad de aprendizaje\", ¿qué se debe hacer con los métodos de interacción?",
+                    answers: ["Cambiarlos frecuentemente para mantener el interés del usuario.", "Ofrecer múltiples métodos diferentes para la misma acción en la misma pantalla.", "Seguir utilizando el mismo método durante el proceso de interacción en la medida de lo posible (consistencia).", "Eliminar la interacción y hacer el proceso automático."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué significa la directriz \"Hablar el lenguaje de la audiencia\"?",
+                    answers: ["Que la interfaz debe estar traducida a todos los idiomas posibles.", "Que el sistema debe incluir reconocimiento de voz.", "Que el lenguaje editorial y visual debe incluir términos, imágenes y semántica que el público entienda.", "Que se debe utilizar jerga técnica precisa para demostrar profesionalidad."],
+                    correct: 2
+                },
+                {
+                    question: "¿Cuál de las siguientes es una regla para mostrar explícitamente las acciones requeridas?",
+                    answers: ["Ocultar las acciones requeridas hasta el final del formulario.", "Utilizar una convención consistente para indicar una acción requerida.", "Variar los indicadores de requerimiento para evitar la monotonía.", "Asumir que el usuario sabe qué campos son obligatorios sin indicarlo."],
+                    correct: 1
+                },
+                {
+                    question: "Si una acción requerida no es explícita en la interfaz, ¿qué recomienda la regla número 3?",
+                    answers: ["Mostrar un mensaje de error emergente.", "Automatizar la acción por defecto provocada por la tecla retorno (Enter).", "Bloquear la pantalla hasta que el usuario adivine la acción.", "Redirigir al usuario a la página de ayuda."],
+                    correct: 1
+                },
+                {
+                    question: "¿A qué se refiere la directriz de \"Sensibilidad Internacional\"?",
+                    answers: ["A la capacidad del hardware de funcionar en diferentes voltajes.", "A que los prototipos deben tener un contenido editorial y visual enfocado a una visión global/internacional.", "A evitar el uso de cualquier texto en la interfaz.", "A utilizar únicamente servidores ubicados en zonas internacionales."],
+                    correct: 1
+                },
+                {
+                    question: "La directriz \"Accesibilidad universal\" implica que el producto debe ser útil para:",
+                    answers: ["Solo los usuarios expertos en tecnología.", "Únicamente los usuarios que pagan la versión premium.", "El usuario habitual y también para los usuarios con cualquier tipo de discapacidad.", "Los administradores del sistema exclusivamente."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué se busca lograr con la directriz \"El control debe tenerlo el usuario\"?",
+                    answers: ["Que el usuario pueda reprogramar el software.", "Que el usuario sienta que controla su interacción y reciba los comentarios/respuestas que espera.", "Que el sistema tome todas las decisiones por el usuario.", "Que el usuario tenga acceso a la base de datos del servidor."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cómo define el material la \"Minimización de la carga cognitiva\"?",
+                    answers: ["La reducción del uso de la memoria RAM del ordenador.", "La percepción del usuario de que puede lograr su objetivo con facilidad cada vez que intenta realizar la tarea de nuevo.", "La eliminación de todas las imágenes para que solo haya texto.", "El uso de colores oscuros para descansar la vista."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el propósito de la directriz de \"Satisfacción\"?",
+                    answers: ["Garantizar que el usuario compre el producto.", "Medir la satisfacción para realizar correcciones en próximas iteraciones y lograr una experiencia satisfactoria.", "Hacer que el usuario sonría siempre que usa la aplicación.", "Enviar correos de agradecimiento automáticos."],
+                    correct: 1
+                },
+                {
+                    question: "En la tabla de priorización de guías de diseño (Worksheet 9.1), ¿cómo se clasifica la \"Ley de Fitt\"?",
+                    answers: ["Guía de Diseño Visual (Organizacional).", "Guía de Interfaz de Usuario (Organizacional).", "Guía de Interfaz de Usuario (Direccional).", "Guía de Diseño Visual (Direccional)."],
+                    correct: 2
+                },
+                {
+                    question: "Según la misma tabla de priorización, ¿la \"Estructura tipográfica\" es una guía direccional u organizativa?",
+                    answers: ["Direccional.", "Organizativa.", "De rendimiento.", "De accesibilidad."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál de las siguientes NO es una Guía de Diseño Visual según el material?",
+                    answers: ["Ritmo y patrón (Rhythm and pattern).", "Unidad y variedad (Unity and variety).", "Revelación progresiva (Progressive disclosure).", "Equilibrio (Balance)."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué paso precede inmediatamente a \"Formular criterio\" en las Guías Paso a Paso?",
+                    answers: ["Finalizar criterio.", "Revisar Guías.", "Crear el prototipo.", "Especificar la lógica de diseño."],
+                    correct: 1
+                },
+                {
+                    question: "Pasando al Tema 5.2 (Crear el diseño), ¿qué se requiere como entrada (\"input\") principal para el Paso 4: Crear el prototipo?",
+                    answers: ["Solo el presupuesto del cliente.", "Los requisitos priorizados, el método elegido, la herramienta seleccionada y los criterios de diseño.", "El código fuente final de la aplicación.", "La aprobación legal del contrato."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué característica especial tiene el Paso 4 (Crear el prototipo) respecto al proceso general?",
+                    answers: ["Es el paso donde se ignoran las fases anteriores.", "Es un paso opcional.", "Es el paso donde converge todo el proceso revisado hasta ese momento.", "Es el paso exclusivo para programadores backend."],
+                    correct: 2
+                },
+                {
+                    question: "Como punto de partida para crear el prototipo en el Paso 4, ¿qué elementos se sugiere utilizar?",
+                    answers: ["Un lienzo en blanco sin guías.", "Las regiones funcionales bloqueadas y los elementos detallados en la pantalla de alta prioridad.", "Capturas de pantalla de la competencia.", "Plantillas genéricas de internet sin modificar."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es el objetivo del Paso 5: Especificar la lógica de diseño?",
+                    answers: ["Calcular el coste horas/hombre.", "Establecer la justificación del diseño basada en objetivos y requisitos antes de entregar el prototipo a los interesados.", "Escribir el manual de usuario final.", "Comprimir los archivos del prototipo."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué asegura la justificación generada en el Paso 5?",
+                    answers: ["Que el prototipo sea estéticamente perfecto.", "Que se ha cumplido con los requisitos y objetivos.", "Que el código está libre de errores (bugs).", "Que el prototipo funcionará en todos los navegadores."],
+                    correct: 1
+                },
+                {
+                    question: "En el contexto de las Guías Visuales, ¿qué par de atributos se utiliza para asegurar un diseño equilibrado pero interesante?",
+                    answers: ["Rojo y Azul.", "Unidad y variedad.", "Grande y Pequeño.", "Texto e Imagen."],
+                    correct: 1
+                },
+                {
+                    question: "Si un diseñador decide agrupar elementos relacionados visualmente para que el usuario entienda su relación, ¿qué directriz visual está aplicando?",
+                    answers: ["Agrupación lógica (Logical grouping).", "Revelación progresiva.", "Sensibilidad internacional.", "Ley de Fitt."],
+                    correct: 0
+                },
+                {
+                    question: "Según el material, ¿para quién sirven de ayuda los criterios de diseño mostrados?",
+                    answers: ["Exclusivamente para los Project Managers.", "Para los 'developers' y 'designers' para crear prototipos a la medida de sus posibilidades.", "Solo para el equipo de marketing.", "Para los usuarios finales durante la fase de aprendizaje."],
+                    correct: 1
+                },
+                {
+                    question: "En la directriz de \"Acciones requeridas\", ¿cómo se suele indicar visualmente un campo obligatorio (campo requerido) según el ejemplo visual del material?",
+                    answers: ["Con un sonido de alerta.", "Con un asterisco (*).", "Haciendo el campo parpadear.", "Ocultando el campo."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué tipo de atributo tiene la directriz \"Balance\" (Equilibrio) en la tabla de priorización?",
+                    answers: ["Organizacional.", "Direccional.", "Estructural.", "Temporal."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué concepto se asocia con la capacidad de navegar con facilidad y eficacia a través de la interfaz para realizar una tarea específica?",
+                    answers: ["Estética.", "Rendimiento (Eficiencia).", "Internacionalización.", "Agrupación lógica."],
+                    correct: 1
+                },
+                {
+                    question: "Si decides usar una ventana secundaria ('pop-up') para mostrar información detallada solo cuando el usuario lo solicita, ¿qué directriz de interfaz estás aplicando?",
+                    answers: ["Ley de Fitt.", "Revelación progresiva.", "Flujo de información.", "Estructura tipográfica."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué directriz visual tiene el atributo \"Organizacional\" y se refiere al uso de retículas?",
+                    answers: ["Grid-based organization.", "Information flow.", "Rhythm and pattern.", "Balance."],
+                    correct: 0
+                },
+                {
+                    question: "¿Cuándo se debe establecer la lógica de diseño (Paso 5)?",
+                    answers: ["Antes de empezar a programar el código final, pero después de validar con el usuario.", "Cuando se ha completado la versión del prototipo, antes de dárselo a las personas interesadas.", "Al inicio del proyecto, antes de la toma de requisitos.", "Durante la fase de mantenimiento del software."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué elementos se utilizan para fundamentar la \"lógica de diseño\" en el Paso 5?",
+                    answers: ["Las opiniones personales del diseñador exclusivamente.", "Los objetivos del prototipo y los requisitos (de negocio, funcionales, técnicos y de usabilidad).", "Las tendencias de moda del año en curso.", "La disponibilidad de los programadores."],
+                    correct: 1
+                }
+            ],
+            6: [ // Chapter 6 - 40 questions - Revisión, Validación y Despliegue
+                {
+                    question: "Contexto: Un equipo de diseño ha finalizado la primera iteración de un prototipo de alta fidelidad. Antes de mostrarlo al cliente externo, deciden realizar una evaluación. Según el material del Tema 6.1, ¿cuál es el paso inmediato y quiénes deben participar principalmente?",
+                    answers: ["Realizar una validación externa con los inversores para asegurar el presupuesto.", "Ejecutar una revisión del diseño interna con el equipo y otros grupos de interés internos, incluyendo gestión y desarrollo.", "Desplegar el diseño en un formato cerrado (PDF) para evitar modificaciones no autorizadas.", "Realizar un test de usabilidad con usuarios finales seleccionados mediante un cuestionario de precalificación."],
+                    correct: 1
+                },
+                {
+                    question: "Contexto: Durante la planificación de la presentación para la revisión del diseño, usted debe establecer una agenda clara. ¿Qué elementos deben incluirse en dicha agenda para enviarla antes de la reunión?",
+                    answers: ["Introducción, antecedentes, requisitos técnicos y presupuesto detallado.", "Escenario, presentación, foro abierto y pasos futuros.", "Lista de participantes, resultados de tests estadísticos, iteraciones y cierre.", "Definición del público, objetivos de la versión, expectativas y lógica de diseño."],
+                    correct: 1
+                },
+                {
+                    question: "Teoría: En el contexto de la revisión interna del diseño (Worksheet 6.1), ¿qué acción es necesaria si se detecta que el prototipo no puede ser utilizado eficazmente por la audiencia definida inicialmente?",
+                    answers: ["Cancelar la revisión y volver a la fase de wireframing.", "Cambiar el formato de entrega a uno \"cerrado\" para simplificar la interacción.", "Realizar ajustes a la definición de la audiencia en la hoja de trabajo.", "Ignorar la dificultad y proceder con la presentación narrativa."],
+                    correct: 2
+                },
+                {
+                    question: "Práctica: Usted está preparando la presentación del diseño. Según los consejos para el \"Paso 4: Cómo se presentará\", ¿qué elementos estructurales debe contener su presentación?",
+                    answers: ["Introducciones, Antecedentes, Un apoyo útil, Requisitos y supuestos.", "Análisis de competidores, Presupuesto, Cronograma, Prototipo.", "Validación de usuario, Lista de errores, Mejoras técnicas, Conclusiones.", "Resumen ejecutivo, Demo en vivo, Q&A, Agradecimientos."],
+                    correct: 0
+                },
+                {
+                    question: "Teoría: ¿Cuál es la diferencia fundamental entre la \"Revisión del Diseño\" y la \"Validación del Prototipo\" según la estructura del temario?",
+                    answers: ["La revisión es técnica y la validación es financiera.", "La revisión se realiza con actores externos y la validación con el equipo interno.", "La revisión es interna (equipo/gestión) y la validación es externa (clientes/usuarios).", "No hay diferencia, son sinónimos en el ciclo de vida del DSI."],
+                    correct: 2
+                },
+                {
+                    question: "Metodología: Al planificar una validación externa mediante Tests de Usabilidad, el primer paso es desarrollar un plan de pruebas. ¿Cuál es el segundo paso crítico para asegurar la calidad de los datos obtenidos?",
+                    answers: ["Elaborar una lista de contactos de los participantes.", "Preparar un cuestionario para precalificar a los participantes (definición exacta del usuario).", "Proporcionar un prototipo de software completo.", "Preparar documentos de validación y acuerdos de confidencialidad."],
+                    correct: 1
+                },
+                {
+                    question: "Teoría: Según la tabla \"Worksheet 12.1: Choose the evaluation method\", ¿cuál de las siguientes combinaciones de herramienta y método es considerada \"muy apropiada\" (++) para una revisión interna?",
+                    answers: ["Paper (Papel).", "Card sorting (Ordenación de tarjetas).", "Coded (Codificado) en Customer Feedback.", "Surveys (Encuestas) en Internal Reviews."],
+                    correct: 1
+                },
+                {
+                    question: "Análisis: Usted necesita evaluar un prototipo de \"Digital interactive\" (Interactivo digital). Según la tabla de selección de métodos de evaluación, ¿qué método de validación es \"muy apropiado\" (++)?",
+                    answers: ["Cognitive walkthroughs (Recorridos cognitivos).", "Surveys (Encuestas).", "Usability Testing (Pruebas de usabilidad).", "Customer Feedback con modelos en blanco (Blank model)."],
+                    correct: 2
+                },
+                {
+                    question: "Procedimiento: Dentro de los pasos necesarios para los Tests de Usabilidad, ¿qué acción corresponde al paso número 8?",
+                    answers: ["Llevar a cabo una sesión de prueba con un participante.", "Revisar y analizar los datos recogidos.", "Elaborar una lista de contactos.", "Elaborar una guía para proporcionar a los participantes el contexto de uso y objetivos."],
+                    correct: 3
+                },
+                {
+                    question: "Escenario: Tras realizar las pruebas de usabilidad (paso 11), el equipo de diseño se encuentra en la fase de análisis (paso 12). ¿Qué deben sintetizar además de los logros de diseño?",
+                    answers: ["El presupuesto gastado en la prueba.", "Recomendaciones para mejorar el diseño.", "La lista de correos de los participantes.", "El código fuente del prototipo."],
+                    correct: 1
+                },
+                {
+                    question: "Teoría: Según la fuente citada de Ann Doubleday et al. sobre la evaluación del diseño, ¿qué incluyen la evolución de los métodos de evaluación de usabilidad además de normas y directrices?",
+                    answers: ["Únicamente pruebas A/B automatizadas.", "Observación, técnicas de control, cuestionarios, checklist de actitud y evaluación de expertos.", "Revisión de código y optimización de bases de datos.", "Reuniones de marketing y ventas."],
+                    correct: 1
+                },
+                {
+                    question: "Toma de Decisiones: Un equipo decide iterar en el diseño. Según el material sobre \"Iterando el diseño\", ¿de qué factores depende cualquier necesidad adicional en la creación de prototipos?",
+                    answers: ["Exclusivamente del presupuesto del cliente.", "Del grado de éxito alcanzado en las pruebas, tiempo, recursos y compromiso del equipo.", "De la tecnología de servidor elegida para el despliegue.", "De la cantidad de \"bugs\" encontrados en el código final."],
+                    correct: 1
+                },
+                {
+                    question: "Teoría: ¿En qué situaciones se debe considerar especialmente iterar en el diseño según el material docente?",
+                    answers: ["Cuando el proyecto tiene un presupuesto ilimitado.", "Si se trata de una exploración de investigación o un nuevo producto/servicio.", "Cuando el cliente no sabe lo que quiere.", "Solo cuando fallan los tests de carga del servidor."],
+                    correct: 1
+                },
+                {
+                    question: "Planificación: ¿Qué elementos debe contener el plan de iteración para ser efectivo?",
+                    answers: ["Un diagrama de Gantt genérico sin prioridades.", "La definición articulada y priorización de problemas, pasos claros y objetivos de resolución.", "Una lista de quejas de los usuarios sin filtrar.", "Nuevos contratos legales con los desarrolladores."],
+                    correct: 1
+                },
+                {
+                    question: "Despliegue: En la fase de \"Despliegue del diseño\", ¿cuál es el objetivo principal de la planificación de la transferencia (handover)?",
+                    answers: ["Asegurar que el equipo de desarrollo firme el contrato.", "Mostrar el enfoque de los objetivos de diseño y que el prototipo se puede utilizar eficazmente.", "Eliminar todas las características interactivas para ahorrar costes.", "Realizar una última prueba de usabilidad con usuarios finales."],
+                    correct: 1
+                },
+                {
+                    question: "Estrategia: Al decidir la forma de entrega del prototipo durante el despliegue, ¿cuáles son las dos estrategias principales comparadas en el material?",
+                    answers: ["Analógico Vs Digital.", "Abierto Vs Cerrado.", "Gratuito Vs De pago.", "Local Vs En la nube."],
+                    correct: 1
+                },
+                {
+                    question: "Teoría: ¿Qué característica define a un formato de entrega \"Abierto\"?",
+                    answers: ["El diseño está congelado y no se puede editar (ej. PDF).", "El diseño puede ser modificado para reflejar cambios resultantes de la transferencia.", "El diseño es de código abierto (Open Source) para el público general.", "El diseño no requiere especificaciones técnicas."],
+                    correct: 1
+                },
+                {
+                    question: "Práctica: Si usted decide utilizar una estrategia de entrega \"Cerrada\" para mantener las especificaciones intactas, ¿qué tipo de documento recomienda el material?",
+                    answers: ["Un archivo editable de Photoshop.", "Un documento con diseño congelado, como PDF.", "Una presentación oral sin soporte visual.", "Un repositorio de código Git con acceso total."],
+                    correct: 1
+                },
+                {
+                    question: "Comunicación: Para una comunicación exitosa con los colaboradores durante el despliegue, el material sugiere tener un rol específico asignado y:",
+                    answers: ["Estar al día con la lógica, los requisitos, la intención y los detalles.", "Evitar cualquier contacto con el equipo de desarrollo.", "Delegar toda la responsabilidad en el Project Manager.", "Saber programar en el lenguaje final del producto."],
+                    correct: 0
+                },
+                {
+                    question: "Estrategia: En cuanto a las formas de entrega \"Narrativo Vs Interactivo\", ¿cuándo es mejor presentar los conceptos en formato de presentación narrativa?",
+                    answers: ["Cuando la audiencia ya conoce el proyecto a fondo.", "Cuando la audiencia es experta en tecnología.", "Cuando la audiencia no tiene dinero invertido en el diseño o es su primer contacto.", "Cuando se requiere una validación técnica exhaustiva."],
+                    correct: 2
+                },
+                {
+                    question: "Gestión: Tras la transferencia del diseño, surgen cuestiones que deben gestionarse. ¿Qué impacto tienen los \"Requerimientos funcionales y supuestos\"?",
+                    answers: ["Solo afectan al presupuesto de marketing.", "Los cambios afectan al diseño de interacción, así como el diseño de prototipos.", "Son irrelevantes una vez aprobado el diseño visual.", "Afectan exclusivamente al backend de la aplicación."],
+                    correct: 1
+                },
+                {
+                    question: "Evaluación: Al evaluar métodos de validación externa, si se utiliza la técnica \"Wizard of Oz\", ¿cuál es su nivel de idoneidad según la Worksheet 12.1?",
+                    answers: ["No aplicable (NA).", "Muy apropiada (++).", "Aceptable (-).", "No práctica (--)."],
+                    correct: 1
+                },
+                {
+                    question: "Procedimiento: ¿Qué paso de los tests de usabilidad implica \"Llevar a cabo la validación en un número predeterminado de sesiones programadas\"?",
+                    answers: ["Paso 1.", "Paso 9.", "Paso 11.", "Paso 14."],
+                    correct: 2
+                },
+                {
+                    question: "Despliegue: ¿Qué se debe hacer con las \"Guías de diseño\" antes de la presentación del prototipo en la fase de despliegue?",
+                    answers: ["Deben improvisarse durante la reunión.", "Deben estar bien definidas, justificadas y documentadas.", "Deben eliminarse para no confundir al cliente.", "Deben ser escritas exclusivamente por los desarrolladores."],
+                    correct: 1
+                },
+                {
+                    question: "Metodología: En el contexto de la revisión interna (Paso 1 del ciclo de diseño), ¿dónde ha quedado definido el público que participa?",
+                    answers: ["En el Worksheet 6.1.", "En el contrato de desarrollo.", "En la reunión de validación externa.", "En el código fuente."],
+                    correct: 0
+                },
+                {
+                    question: "Validación: ¿Qué elementos se utilizan para lograr la validación por actores externos según el texto?",
+                    answers: ["Auditorías financieras y legales.", "Pruebas de usabilidad, focus group y sesiones de evaluación.", "Compilaciones de código y pruebas unitarias.", "Reuniones de revisión interna exclusivamente."],
+                    correct: 1
+                },
+                {
+                    question: "Despliegue: ¿Qué se debe documentar bien respecto a los \"Requisitos técnicos y supuestos\" durante la gestión post-transferencia?",
+                    answers: ["La factibilidad técnica.", "El color de los botones.", "El nombre del servidor.", "El horario de los desarrolladores."],
+                    correct: 0
+                },
+                {
+                    question: "Planificación: ¿Qué elemento NO es parte de los consejos para establecer una agenda en el paso 4 de la revisión interna?",
+                    answers: ["Escenario.", "Presentación.", "Presupuesto detallado.", "Foro abierto."],
+                    correct: 2
+                },
+                {
+                    question: "Evaluación: Según la Worksheet 12.1, ¿cuán apropiado es el uso de \"Video\" para una \"External Review\"?",
+                    answers: ["No aplicable (NA).", "Muy apropiado (++).", "Aceptable (-).", "Inapropiado (+)."],
+                    correct: 1
+                },
+                {
+                    question: "Evaluación: ¿Para qué método de evaluación es \"muy apropiado\" (++) el uso de \"Paper\" (Papel) según la Worksheet 12.1?",
+                    answers: ["Internal Reviews.", "Usability Testing.", "Surveys.", "Cognitive walkthroughs."],
+                    correct: 1
+                },
+                {
+                    question: "Despliegue: ¿Qué habilidad es necesaria para comunicar con los colaboradores durante el despliegue del diseño?",
+                    answers: ["Ser capaz de realizar la contabilidad del proyecto.", "Ser capaz de entender cómo se realiza la transición del diseño al desarrollo.", "Ser capaz de ignorar las limitaciones técnicas.", "Ser capaz de imponer el diseño sin cambios."],
+                    correct: 1
+                },
+                {
+                    question: "Validación: ¿Qué paso de los Tests de Usabilidad implica \"Proporcionar un prototipo software para validar la prueba\"?",
+                    answers: ["Paso 2.", "Paso 5.", "Paso 9.", "Paso 13."],
+                    correct: 2
+                },
+                {
+                    question: "Teoría: En la gestión de cuestiones tras la transferencia, ¿contra qué deben medirse los \"Requisitos de usabilidad y supuestos\"?",
+                    answers: ["Contra las preferencias del diseñador.", "Contra las necesidades del usuario.", "Contra las capacidades del hardware obsoleto.", "Contra el tiempo disponible de los desarrolladores."],
+                    correct: 1
+                },
+                {
+                    question: "Concepto: ¿Qué implica el \"Foro abierto\" dentro de la agenda de revisión de diseño?",
+                    answers: ["Un espacio online donde cualquiera puede opinar.", "Una parte de la reunión presencial programada en la agenda.", "Un sistema de tickets de soporte.", "Una red social corporativa."],
+                    correct: 1
+                },
+                {
+                    question: "Evaluación: Según la Worksheet 12.1, ¿qué herramienta tiene una valoración de NA (no aplicable) para \"Usability Testing\"?",
+                    answers: ["Paper.", "Wizard of Oz.", "Card sorting.", "Digital interactive."],
+                    correct: 2
+                },
+                {
+                    question: "Procedimiento: Antes de realizar la sesión de prueba con un participante (Paso 10), ¿qué debe haberse elaborado según el Paso 3?",
+                    answers: ["El informe final de resultados.", "Una lista de contactos de los participantes.", "El manual de usuario final.", "La factura para el cliente."],
+                    correct: 1
+                },
+                {
+                    question: "Despliegue: ¿Qué se entiende por un \"periodo de transición\" en el despliegue del diseño?",
+                    answers: ["El tiempo que tarda el servidor en reiniciarse.", "Un periodo bien planificado que involucre activamente a todo el equipo para el uso eficaz del prototipo.", "El tiempo de vacaciones del equipo de diseño tras la entrega.", "El intervalo entre el diseño en papel y el digital."],
+                    correct: 1
+                },
+                {
+                    question: "Validación: ¿Cuál es el último paso (Paso 14) listado para la estrategia de Tests de Usabilidad?",
+                    answers: ["Pagar a los participantes.", "Preparar una presentación de los resultados de validación, éxitos y mejoras.", "Borrar los datos de los usuarios.", "Archivar el proyecto definitivamente."],
+                    correct: 1
+                },
+                {
+                    question: "Revisión Interna: ¿Qué elementos componen el \"Ciclo del diseño y construcción del prototipo\" previo a la revisión, según el Paso 1?",
+                    answers: ["Definir público, objetivos, expectativas, método de presentación y lógica de diseño.", "Validar, iterar, cobrar y cerrar.", "Programar, testear, desplegar y mantener.", "Bocetar, pintar, imprimir y encuadernar."],
+                    correct: 0
+                },
+                {
+                    question: "Análisis Comparativo: Según la Worksheet 12.1, ¿cuál es la única herramienta calificada como \"muy apropiada\" (++) para todas las siguientes metodologías: Revisiones Internas, Revisiones Externas y Revisiones de Pares (Peer Reviews)?",
+                    answers: ["Paper.", "Video.", "Story board.", "Coded."],
+                    correct: 1
+                }
+            ],
+            7: [ // Chapter 7 - 20 questions - Prototipando con Office
+                {
+                    question: "Según el material, ¿cuál es la principal razón estratégica para utilizar la suite de Office como herramienta de prototipado en un entorno empresarial?",
+                    answers: ["Tienen capacidades de renderizado gráfico superiores a las herramientas de diseño dedicadas.", "Son de código abierto y permiten modificar el núcleo del software para adaptarlo al diseño.", "Permiten la colaboración de un equipo multidisciplinar (analistas, gerentes, desarrolladores) debido a su omnipresencia y dominio generalizado.", "Incluyen por defecto librerías de widgets específicos para iOS y Android."],
+                    correct: 2
+                },
+                {
+                    question: "Analizando la Tabla 23.1 sobre las características comunes de MS Office, ¿qué limitación funcional presenta Excel en comparación con PowerPoint en cuanto a la animación?",
+                    answers: ["Excel no permite ningún tipo de movimiento ni simulación de interacción.", "Excel carece de características nativas de animación, pero puede simularlas mediante el enlazado de múltiples hojas de cálculo.", "Excel solo permite animaciones si se exporta el archivo a formato HTML.", "Excel tiene las mismas características de animación que PowerPoint, pero son más difíciles de acceder."],
+                    correct: 1
+                },
+                {
+                    question: "Dentro de la metodología de prototipado con Word descrita en el documento, ¿qué actividades específicas corresponden al \"Paso 1: Preparar el documento\"?",
+                    answers: ["Definir el área gráfica y el área de texto.", "Configurar la página (Page set) y definir los estilos (Styles).", "Añadir callouts (llamadas) y widgets.", "Escribir las descripciones textuales para cada elemento."],
+                    correct: 1
+                },
+                {
+                    question: "¿Cuál es considerada una desventaja significativa al utilizar Microsoft Word para el diseño de interfaces gráficas según el texto?",
+                    answers: ["La carencia de un corrector ortográfico para los textos de la interfaz.", "La incapacidad de utilizar colores personalizados o paletas RGB.", "La frustración que puede generar la colocación exacta de gráficos y el manejo de la paginación.", "La imposibilidad de distribuir el archivo fácilmente a otros miembros del equipo."],
+                    correct: 2
+                },
+                {
+                    question: "En el contexto del \"Paso 3: Diseño del Wireframe\" (Wireframe design), ¿qué elementos se integran en esta fase?",
+                    answers: ["Configuración de márgenes y estilos de fuente.", "Áreas de texto y áreas gráficas generales.", "Cajas gráficas, etiquetado (labeling), callouts y widgets.", "Documentación textual detallada de la funcionalidad."],
+                    correct: 2
+                },
+                {
+                    question: "Considerando las ventajas de Word para el prototipado, ¿cómo describe el texto la curva de aprendizaje para los usuarios?",
+                    answers: ["Pronunciada, debido a la complejidad de las herramientas de dibujo ocultas.", "Moderada, requiriendo un curso previo de diseño gráfico.", "Inexistente o nada pronunciada, ya que casi todo el mundo tiene experiencia en su uso.", "Variable, dependiendo de si se usa la versión de Mac o Windows."],
+                    correct: 2
+                },
+                {
+                    question: "¿Qué característica presente en Excel NO está disponible (o marcada como 'No') en Word ni en PowerPoint según la Tabla 23.1?",
+                    answers: ["Celdas en cuadrícula (Grid cells).", "Manipulación de gráficos (Graphic manipulation).", "Importación de gráficos.", "Uso de autoformas (Auto shapes)."],
+                    correct: 0
+                },
+                {
+                    question: "Según el flujo de trabajo presentado para Word, ¿cuál es el propósito principal del \"Paso 4\"?",
+                    answers: ["Exportar el documento a PDF para su revisión.", "Realizar la documentación textual mediante descripciones para cada \"callout\".", "Definir la paleta de colores final del producto.", "Programar las macros para simular interacción."],
+                    correct: 1
+                },
+                {
+                    question: "¿Por qué el texto sugiere que la paginación en Word es una limitación para el diseño de interfaces?",
+                    answers: ["Porque Word solo permite un número limitado de páginas por documento.", "Porque las interfaces de usuario modernas no utilizan el concepto de página.", "Porque el texto fluye de una página a la siguiente (concepto de documento), lo cual difiere de colocar pantallas estáticas una encima de otra.", "Porque la paginación impide el uso de hipervínculos internos."],
+                    correct: 2
+                },
+                {
+                    question: "Según la teoría expuesta, ¿qué característica de Word facilita la creación rápida de prototipos textuales y corrección de contenido?",
+                    answers: ["La capacidad de generar código HTML limpio automáticamente.", "Las herramientas de animación avanzada de texto.", "Las funciones de buscar y reemplazar, y el corrector ortográfico.", "La integración con bases de datos SQL."],
+                    correct: 2
+                },
+                {
+                    question: "En el \"Paso 2: Iniciar el framework\" (Begin framework), ¿qué distinción visual o estructural se establece?",
+                    answers: ["Se separan los colores primarios de los secundarios.", "Se define el área gráfica frente al área de texto.", "Se escribe el código fuente de la página.", "Se establecen los hipervínculos de navegación global."],
+                    correct: 1
+                },
+                {
+                    question: "Según la Tabla 23.1, ¿cuál de las siguientes características de control de posición NO está presente en Word ni PowerPoint, pero sí en Excel?",
+                    answers: ["Easy position control (Control fácil de posición).", "Find replace (Buscar y reemplazar).", "Align graphics (Alinear gráficos).", "Grid cells (Celdas de cuadrícula)."],
+                    correct: 0
+                },
+                {
+                    question: "El documento menciona que las aplicaciones de Office permiten aportar distintos niveles de fidelidad. ¿Qué significa esto en el contexto del prototipado?",
+                    answers: ["Que solo se pueden hacer prototipos de baja fidelidad (bocetos en blanco y negro).", "Que cada aplicación tiene características que apoyan distintas fidelidades y características de los prototipos.", "Que la fidelidad depende exclusivamente de la calidad del monitor donde se visualiza.", "Que Office convierte automáticamente los bocetos a alta fidelidad."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué elemento visual se utiliza en el \"Paso 3\" y en la documentación del \"Paso 4\" para vincular las explicaciones textuales con las partes del wireframe?",
+                    answers: ["Hipervínculos web.", "Callouts (Llamadas).", "Notas al pie de página estándar.", "Comentarios ocultos."],
+                    correct: 1
+                },
+                {
+                    question: "Respecto a la funcionalidad de \"Celdas de tabla flotantes\" (Floating table cells) en la Tabla 23.1, ¿cuál es la situación de las tres aplicaciones?",
+                    answers: ["Word y PowerPoint: Sí / Excel: No.", "Word y Excel: Sí / PowerPoint: No.", "Las tres aplicaciones: Sí.", "Las tres aplicaciones: No."],
+                    correct: 0
+                },
+                {
+                    question: "¿Qué papel juegan los \"Estilos\" (Styles) en el Paso 1 de la metodología de prototipado en Word?",
+                    answers: ["No son necesarios, se puede formatear todo manualmente.", "Son parte fundamental de la preparación del documento para asegurar consistencia.", "Se utilizan solo para la exportación final a HTML.", "Sirven para animar las transiciones entre páginas."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué ventaja de distribución ofrece el uso de prototipos hechos en Word?",
+                    answers: ["Se pueden distribuir fácilmente a otros miembros del equipo debido a la gran base de usuarios instalada.", "Se distribuyen automáticamente a la nube de Microsoft sin intervención del usuario.", "Se pueden convertir en ejecutables (.exe) independientes.", "Requieren un visor especial que es gratuito."],
+                    correct: 0
+                },
+                {
+                    question: "En los ejemplos visuales de Wireframe mostrados en el documento, ¿qué tipo de elementos de interfaz se representan?",
+                    answers: ["Modelos 3D y texturas complejas.", "Elementos estructurales como Navegación Global, Búsqueda, y áreas de contenido.", "Código fuente Java y C++.", "Videos incrustados y animaciones Flash."],
+                    correct: 1
+                },
+                {
+                    question: "¿Qué afirmación es verdadera sobre el \"Modo de Presentación\" (Presentation mode) según la Tabla 23.1?",
+                    answers: ["Solo PowerPoint tiene un modo de presentación real; Word y Excel simulan un modo de pantalla completa.", "Las tres aplicaciones tienen modos de presentación idénticos.", "Excel tiene el mejor modo de presentación para prototipos gráficos.", "Word no permite ninguna visualización a pantalla completa."],
+                    correct: 0
+                },
+                {
+                    question: "¿Cómo se justifica en el texto que las aplicaciones de Office, utilizadas por contables y administrativos, sean útiles para prototipar?",
+                    answers: ["Porque son las herramientas más baratas del mercado.", "Porque permiten la programación avanzada en Python.", "Porque son una característica estándar en los equipos de negocios y la mayoría de la gente tiene dominio de ellas.", "Porque fueron diseñadas originalmente por diseñadores gráficos para diseñadores gráficos."],
+                    correct: 2
+                }
+            ]
+        };
+
+        // State management
+        let state = {
+            mode: 'learning',
+            currentChapter: null,
+            currentQuestion: 0,
+            score: 0,
+            correctCount: 0,
+            incorrectCount: 0,
+            chapterScores: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0}, // Score per chapter (0-4 points)
+            chapterProgress: {1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}},
+            chapterStats: {1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}, // Track per-session stats
+            userAnswers: [],
+            answered: false,
+            questionStartTime: null,
+            totalQuestionTime: 0,
+            questionsAnswered: 0,
+            streak: 0,
+            lastStudyDate: null,
+            reviewMode: false,
+            mistakeQuestions: [], // Questions answered incorrectly
+            isRandomQuiz: false,
+            randomQuestions: [], // For random quiz mode
+            progressHistory: [] // Detailed history of all quiz sessions
+        };
+
+        let timerInterval = null;
+        let sessionStartTime = null;
+
+        // Load saved state
+        function loadState() {
+            const saved = localStorage.getItem('quizAppState');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                state = {...state, ...savedState};
+                updateStats();
+                updateStreak();
+            }
+        }
+
+        // Save state
+        function saveState() {
+            localStorage.setItem('quizAppState', JSON.stringify(state));
+            showSaveIndicator();
+        }
+
+        // Auto-save every 5 seconds
+        setInterval(saveState, 5000);
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+        }
+
+        // Update streak
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const lastDate = state.lastStudyDate;
+
+            if (!lastDate) {
+                state.streak = 1;
+                state.lastStudyDate = today;
+            } else if (lastDate !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastDate === yesterday.toDateString()) {
+                    state.streak++;
+                } else {
+                    state.streak = 1;
+                }
+                state.lastStudyDate = today;
+            }
+
+            document.getElementById('streakBadge').textContent = `🔥 ${state.streak} ${state.streak === 1 ? 'zi' : 'zile'}`;
+            saveState();
+        }
+
+        // Timer functions
+        function startQuestionTimer() {
+            state.questionStartTime = Date.now();
+            sessionStartTime = sessionStartTime || Date.now();
+            document.getElementById('timerDisplay').classList.add('active');
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopQuestionTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (state.questionStartTime) {
+                const timeSpent = Math.floor((Date.now() - state.questionStartTime) / 1000);
+                state.totalQuestionTime += timeSpent;
+                state.questionsAnswered++;
+                updateAvgTime();
+            }
+        }
+
+        function updateTimer() {
+            if (!sessionStartTime) return;
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `⏱️ ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateAvgTime() {
+            if (state.questionsAnswered > 0) {
+                const avg = Math.round(state.totalQuestionTime / state.questionsAnswered);
+                document.getElementById('avgTime').textContent = `${avg}s`;
+            }
+        }
+
+        // Set mode
+        function setMode(mode) {
+            state.mode = mode;
+            state.reviewMode = (mode === 'review');
+            document.getElementById('learningModeBtn').classList.toggle('active', mode === 'learning');
+            document.getElementById('examModeBtn').classList.toggle('active', mode === 'exam');
+            document.getElementById('reviewModeBtn').classList.toggle('active', mode === 'review');
+            saveState();
+        }
+
+        // Initialize chapters
+        function initChapters() {
+            const grid = document.getElementById('chaptersGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 7; i++) {
+                const progress = calculateChapterProgress(i);
+                const mistakes = countChapterMistakes(i);
+                const chapterScore = state.chapterScores[i] || 0;
+                const card = document.createElement('div');
+                card.className = 'chapter-card';
+                card.onclick = () => startChapter(i);
+                
+                let mistakeInfo = mistakes > 0 ? `<div class="chapter-progress" style="color: #ff6b6b;">❌ ${mistakes} mistakes</div>` : '';
+                
+                // Chapter 7 has 20 questions, others have 40
+                const totalQuestions = (i === 7) ? 20 : 40;
+                
+                card.innerHTML = `
+                    <div class="chapter-title">Chapter ${i}</div>
+                    <div class="chapter-progress" style="font-size: 1.3em; color: #00d9ff; font-weight: bold;">⭐ ${chapterScore.toFixed(1)}/4.0 points</div>
+                    <div class="chapter-progress">${progress.answered}/${totalQuestions} questions</div>
+                    <div class="chapter-progress" style="color: #00ff88;">✓ Correct: ${progress.correct}</div>
+                    ${mistakeInfo}
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${(progress.answered / totalQuestions) * 100}%"></div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            }
+        }
+
+        function calculateChapterProgress(chapter) {
+            const progress = state.chapterProgress[chapter] || {};
+            const answered = Object.keys(progress).length;
+            const correct = Object.values(progress).filter(v => v === true).length;
+            return { answered, correct };
+        }
+
+        function countChapterMistakes(chapter) {
+            return state.mistakeQuestions.filter(q => q.chapter === chapter).length;
+        }
+
+        // Start chapter - FIX: Reset session stats to prevent score accumulation
+        function startChapter(chapter) {
+            state.currentChapter = chapter;
+            state.currentQuestion = 0;
+            state.userAnswers = [];
+            state.answered = false;
+            state.isRandomQuiz = false;
+            
+            // IMPORTANT FIX: Reset session stats for this chapter
+            if (!state.chapterStats[chapter]) {
+                state.chapterStats[chapter] = {};
+            }
+            state.chapterStats[chapter] = {
+                sessionScore: 0,
+                sessionCorrect: 0,
+                sessionIncorrect: 0,
+                startTime: Date.now()
+            };
+            
+            // Update streak on study
+            updateStreak();
+            
+            // Start timer
+            sessionStartTime = Date.now();
+            startQuestionTimer();
+            
+            // Update score display
+            updateScoreDisplay();
+            
+            document.getElementById('chaptersView').style.display = 'none';
+            document.getElementById('quizContainer').classList.add('active');
+            document.getElementById('resultsContainer').classList.remove('active');
+            
+            // Show/hide review mode indicator
+            document.getElementById('reviewModeIndicator').style.display = 
+                state.reviewMode ? 'block' : 'none';
+            
+            loadQuestion();
+        }
+
+        // Start Random Quiz - NEW FEATURE
+        function startRandomQuiz() {
+            state.isRandomQuiz = true;
+            state.currentChapter = 'random';
+            state.currentQuestion = 0;
+            state.userAnswers = [];
+            state.answered = false;
+            
+            // Generate 40 random questions from all chapters
+            state.randomQuestions = [];
+            const allQuestions = [];
+            
+            // Collect all questions from all chapters
+            for (let chapter = 1; chapter <= 7; chapter++) {
+                const chapterQuestions = quizData[chapter] || [];
+                chapterQuestions.forEach((q, index) => {
+                    allQuestions.push({
+                        ...q,
+                        originalChapter: chapter,
+                        originalIndex: index
+                    });
+                });
+            }
+            
+            // Shuffle and select 40 questions
+            const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+            state.randomQuestions = shuffled.slice(0, Math.min(40, shuffled.length));
+            
+            if (state.randomQuestions.length === 0) {
+                alert('No questions in chapters. Add questions first!');
+                return;
+            }
+            
+            // Reset session stats for random quiz
+            state.chapterStats['random'] = {
+                sessionScore: 0,
+                sessionCorrect: 0,
+                sessionIncorrect: 0,
+                startTime: Date.now()
+            };
+            
+            // Update streak on study
+            updateStreak();
+            
+            // Start timer
+            sessionStartTime = Date.now();
+            startQuestionTimer();
+            
+            // Update score display
+            document.getElementById('scoreLabel').textContent = 'Quiz Aleatoriu';
+            document.getElementById('totalScore').textContent = '0/40';
+            
+            document.getElementById('chaptersView').style.display = 'none';
+            document.getElementById('quizContainer').classList.add('active');
+            document.getElementById('resultsContainer').classList.remove('active');
+            document.getElementById('reviewModeIndicator').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        // Update score display
+        function updateScoreDisplay() {
+            if (state.isRandomQuiz) {
+                document.getElementById('scoreLabel').textContent = 'Quiz Aleatoriu';
+                document.getElementById('totalScore').textContent = '0/40';
+            } else if (state.currentChapter) {
+                const score = state.chapterScores[state.currentChapter] || 0;
+                document.getElementById('scoreLabel').textContent = `Chapter ${state.currentChapter}`;
+                document.getElementById('totalScore').textContent = `${score.toFixed(1)}/4.0`;
+            }
+        }
+
+        // Load question
+        function loadQuestion() {
+            let questions;
+            
+            // Handle random quiz mode
+            if (state.isRandomQuiz) {
+                questions = state.randomQuestions;
+            } else {
+                questions = quizData[state.currentChapter];
+                if (!questions || questions.length === 0) {
+                    alert('Chapter contains no questions. Please add questions!');
+                    exitQuiz();
+                    return;
+                }
+
+                // Filter for review mode
+                if (state.reviewMode) {
+                    const mistakesForChapter = state.mistakeQuestions.filter(q => q.chapter === state.currentChapter);
+                    if (mistakesForChapter.length === 0) {
+                        alert('Congratulations! You have no mistakes in this chapter!');
+                        exitQuiz();
+                        return;
+                    }
+                    questions = mistakesForChapter.map(m => questions[m.questionIndex]);
+                }
+            }
+
+            if (state.currentQuestion >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const q = questions[state.currentQuestion];
+            state.answered = false;
+            
+            // Start timer for this question
+            startQuestionTimer();
+            
+            // Display question number and chapter info
+            if (state.isRandomQuiz) {
+                document.getElementById('questionNumber').textContent = `Question ${state.currentQuestion + 1}/${questions.length}`;
+                document.getElementById('currentChapter').textContent = `From Chapter ${q.originalChapter || '?'}`;
+            } else {
+                document.getElementById('questionNumber').textContent = `Question ${state.currentQuestion + 1}/${questions.length}`;
+                document.getElementById('currentChapter').textContent = `Chapter ${state.currentChapter}`;
+            }
+            
+            document.getElementById('questionText').textContent = q.question;
+            
+            const grid = document.getElementById('answersGrid');
+            grid.innerHTML = '';
+            
+            q.answers.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = `${String.fromCharCode(65 + index)}. ${answer}`;
+                btn.onclick = () => selectAnswer(index);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        // Select answer
+        function selectAnswer(index) {
+            if (state.answered) return;
+
+            // Stop timer for this question
+            stopQuestionTimer();
+
+            let questions, q, currentChapter;
+            
+            // Get the correct question based on mode
+            if (state.isRandomQuiz) {
+                questions = state.randomQuestions;
+                q = questions[state.currentQuestion];
+                currentChapter = 'random';
+            } else {
+                questions = quizData[state.currentChapter];
+                q = questions[state.currentQuestion];
+                currentChapter = state.currentChapter;
+            }
+            
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach(btn => btn.classList.add('disabled'));
+            buttons[index].classList.add('selected');
+
+            const isCorrect = index === q.correct;
+            state.userAnswers.push(index);
+
+            // Calculate score per chapter: 40 questions = 4 points, so 0.1 per correct, -0.033 per incorrect
+            const pointsPerCorrect = 0.1; // 40 * 0.1 = 4 points maximum
+            const pointsPerIncorrect = 0.033;
+
+            if (state.mode === 'learning' || state.mode === 'review') {
+                state.answered = true;
+                
+                const sessionStats = state.chapterStats[currentChapter];
+                
+                if (isCorrect) {
+                    buttons[index].classList.add('correct');
+                    sessionStats.sessionScore += pointsPerCorrect;
+                    sessionStats.sessionCorrect++;
+                    
+                    // Update chapter score (only for non-random quiz)
+                    if (!state.isRandomQuiz) {
+                        state.chapterScores[currentChapter] = Math.min(4, (state.chapterScores[currentChapter] || 0) + pointsPerCorrect);
+                        updateScoreDisplay();
+                    }
+                    
+                    showFeedback(true, `✅ Correct! +${pointsPerCorrect.toFixed(2)} points`);
+                    
+                    // Remove from mistakes if it was there
+                    if (!state.isRandomQuiz) {
+                        state.mistakeQuestions = state.mistakeQuestions.filter(
+                            m => !(m.chapter === currentChapter && m.questionIndex === state.currentQuestion)
+                        );
+                    }
+                } else {
+                    buttons[index].classList.add('incorrect');
+                    buttons[q.correct].classList.add('correct');
+                    sessionStats.sessionScore -= pointsPerIncorrect;
+                    sessionStats.sessionIncorrect++;
+                    
+                    // Update chapter score (only for non-random quiz)
+                    if (!state.isRandomQuiz) {
+                        state.chapterScores[currentChapter] = Math.max(0, (state.chapterScores[currentChapter] || 0) - pointsPerIncorrect);
+                        updateScoreDisplay();
+                    }
+                    
+                    showFeedback(false, `❌ Wrong! -${pointsPerIncorrect.toFixed(3)} points. Correct answer: ${String.fromCharCode(65 + q.correct)}`);
+                    
+                    // Add to mistakes for review (only for non-random quiz)
+                    if (!state.isRandomQuiz) {
+                        const mistake = {
+                            chapter: currentChapter,
+                            questionIndex: state.currentQuestion,
+                            timestamp: Date.now()
+                        };
+                        if (!state.mistakeQuestions.find(m => m.chapter === mistake.chapter && m.questionIndex === mistake.questionIndex)) {
+                            state.mistakeQuestions.push(mistake);
+                        }
+                    }
+                }
+
+                if (!state.isRandomQuiz) {
+                    state.chapterProgress[currentChapter][state.currentQuestion] = isCorrect;
+                }
+                updateStats();
+                document.getElementById('nextBtn').disabled = false;
+            } else {
+                // Exam mode - doar salvează răspunsul
+                setTimeout(() => {
+                    state.currentQuestion++;
+                    loadQuestion();
+                }, 300);
+            }
+
+            saveState();
+        }
+
+        function showFeedback(isCorrect, message) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback show ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.textContent = message;
+        }
+
+        // Next question
+        function nextQuestion() {
+            state.currentQuestion++;
+            loadQuestion();
+        }
+
+        // Show results - FIX: Use session stats to prevent accumulation
+        function showResults() {
+            stopQuestionTimer();
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            document.getElementById('timerDisplay').classList.remove('active');
+            
+            const currentChapter = state.isRandomQuiz ? 'random' : state.currentChapter;
+            const sessionStats = state.chapterStats[currentChapter];
+            
+            if (state.mode === 'exam') {
+                // Calculate exam results
+                const questions = state.isRandomQuiz ? state.randomQuestions : quizData[state.currentChapter];
+                const pointsPerCorrect = 0.1;
+                const pointsPerIncorrect = 0.033;
+                
+                questions.forEach((q, index) => {
+                    const isCorrect = state.userAnswers[index] === q.correct;
+                    if (isCorrect) {
+                        sessionStats.sessionScore += pointsPerCorrect;
+                        sessionStats.sessionCorrect++;
+                        
+                        if (!state.isRandomQuiz) {
+                            state.chapterScores[currentChapter] = Math.min(4, (state.chapterScores[currentChapter] || 0) + pointsPerCorrect);
+                        }
+                    } else {
+                        sessionStats.sessionScore -= pointsPerIncorrect;
+                        sessionStats.sessionIncorrect++;
+                        
+                        if (!state.isRandomQuiz) {
+                            state.chapterScores[currentChapter] = Math.max(0, (state.chapterScores[currentChapter] || 0) - pointsPerIncorrect);
+                        }
+                        
+                        // Add to mistakes
+                        if (!state.isRandomQuiz) {
+                            const mistake = {chapter: currentChapter, questionIndex: index, timestamp: Date.now()};
+                            if (!state.mistakeQuestions.find(m => m.chapter === mistake.chapter && m.questionIndex === mistake.questionIndex)) {
+                                state.mistakeQuestions.push(mistake);
+                            }
+                        }
+                    }
+                    if (!state.isRandomQuiz) {
+                        state.chapterProgress[currentChapter][index] = isCorrect;
+                    }
+                });
+                updateStats();
+            }
+
+            // Use session stats for display
+            const sessionTotal = sessionStats.sessionCorrect + sessionStats.sessionIncorrect;
+            const sessionPercentage = sessionTotal > 0 ? Math.round((sessionStats.sessionCorrect / sessionTotal) * 100) : 0;
+            
+            const totalTime = Math.floor((Date.now() - sessionStats.startTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+
+            const scoreText = state.isRandomQuiz 
+                ? `${sessionStats.sessionCorrect}/${sessionTotal} correct` 
+                : `${sessionStats.sessionScore.toFixed(2)}/4.0 points (this session)`;
+            
+            document.getElementById('finalScore').textContent = scoreText;
+            document.getElementById('resultCorrect').textContent = sessionStats.sessionCorrect;
+            document.getElementById('resultIncorrect').textContent = sessionStats.sessionIncorrect;
+            document.getElementById('resultPercentage').textContent = sessionPercentage + '%';
+
+            // Add time display
+            const resultsContainer = document.getElementById('resultsContainer');
+            let timeDisplay = resultsContainer.querySelector('.time-display');
+            if (!timeDisplay) {
+                timeDisplay = document.createElement('div');
+                timeDisplay.className = 'time-display';
+                timeDisplay.style.cssText = 'text-align: center; font-size: 1.2em; color: #00d9ff; margin: 20px 0;';
+                resultsContainer.querySelector('.result-card').appendChild(timeDisplay);
+            }
+            timeDisplay.textContent = `⏱️ Total Time: ${minutes}m ${seconds}s`;
+
+            // Save to progress history
+            saveProgressHistory(sessionStats, sessionPercentage, totalTime, sessionTotal);
+
+            document.getElementById('quizContainer').classList.remove('active');
+            document.getElementById('resultsContainer').classList.add('active');
+            saveState();
+        }
+
+        // Update stats
+        function updateStats() {
+            // Update score display based on current context
+            updateScoreDisplay();
+
+            let totalAnswered = 0;
+            let chaptersComplete = 0;
+            
+            for (let i = 1; i <= 7; i++) {
+                const answered = Object.keys(state.chapterProgress[i] || {}).length;
+                totalAnswered += answered;
+                // Chapter 7 has 20 questions, others have 40
+                const totalQuestions = (i === 7) ? 20 : 40;
+                if (answered === totalQuestions) chaptersComplete++;
+            }
+            
+            const totalPossibleQuestions = (6 * 40) + 20; // Chapters 1-6: 40 each, Chapter 7: 20 = 260 total
+            const globalProgress = Math.round((totalAnswered / totalPossibleQuestions) * 100);
+            document.getElementById('globalProgress').textContent = globalProgress + '%';
+            document.getElementById('chaptersComplete').textContent = `${chaptersComplete}/7`;
+        }
+
+        // Exit quiz
+        function exitQuiz() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            sessionStartTime = null;
+            document.getElementById('timerDisplay').classList.remove('active');
+            document.getElementById('quizContainer').classList.remove('active');
+            document.getElementById('resultsContainer').classList.remove('active');
+            document.getElementById('chaptersView').style.display = 'block';
+            initChapters();
+        }
+
+        function exitToChapters() {
+            exitQuiz();
+        }
+
+        function restartQuiz() {
+            startChapter(state.currentChapter);
+        }
+
+        // Progress History Functions
+        function saveProgressHistory(sessionStats, percentage, totalTime, questionCount) {
+            const historyEntry = {
+                timestamp: Date.now(),
+                date: new Date().toLocaleString('ro-RO'),
+                mode: state.mode,
+                chapter: state.isRandomQuiz ? 'Random Quiz' : `Capitolul ${state.currentChapter}`,
+                correct: sessionStats.sessionCorrect,
+                incorrect: sessionStats.sessionIncorrect,
+                total: questionCount,
+                percentage: percentage,
+                score: sessionStats.sessionScore.toFixed(2),
+                duration: totalTime,
+                isRandomQuiz: state.isRandomQuiz
+            };
+
+            state.progressHistory.unshift(historyEntry); // Add at beginning (most recent first)
+            
+            // Keep only last 100 sessions to prevent excessive data
+            if (state.progressHistory.length > 100) {
+                state.progressHistory = state.progressHistory.slice(0, 100);
+            }
+
+            updateHistoryCount();
+            saveState();
+        }
+
+        function updateHistoryCount() {
+            const count = state.progressHistory.length;
+            document.getElementById('historyCount').textContent = `${count} ${count === 1 ? 'sesiune' : 'sesiuni'}`;
+        }
+
+        function showProgressHistory() {
+            const modal = document.getElementById('historyModal');
+            const historyList = document.getElementById('historyList');
+            
+            if (state.progressHistory.length === 0) {
+                historyList.innerHTML = '<div class="no-history">📭 Nu există încă sesiuni completate.<br>Începe un quiz pentru a vedea progresul!</div>';
+            } else {
+                let html = '';
+                state.progressHistory.forEach((entry, index) => {
+                    const minutes = Math.floor(entry.duration / 60);
+                    const seconds = entry.duration % 60;
+                    const modeClass = entry.isRandomQuiz ? 'random' : entry.mode;
+                    const modeText = entry.mode === 'learning' ? '📖 Learning' : 
+                                    entry.mode === 'exam' ? '📝 Exam' : 
+                                    entry.mode === 'review' ? '🔄 Review' : '🎲 Random';
+
+                    html += `
+                        <div class="history-item">
+                            <div class="history-item-header">
+                                <div class="history-date">${entry.date}</div>
+                                <div class="history-mode ${modeClass}">${modeText}</div>
+                            </div>
+                            <div style="margin-bottom: 12px; color: #00d9ff; font-weight: bold; font-size: 1.05em;">
+                                ${entry.chapter}
+                            </div>
+                            <div class="history-details">
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Rezultat</div>
+                                    <div class="history-stat-value">${entry.percentage}%</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Corecte</div>
+                                    <div class="history-stat-value" style="color: #00ff88;">${entry.correct}</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Greșite</div>
+                                    <div class="history-stat-value" style="color: #ff4444;">${entry.incorrect}</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Total</div>
+                                    <div class="history-stat-value">${entry.total}</div>
+                                </div>
+                                ${!entry.isRandomQuiz ? `
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Scor Capitol</div>
+                                    <div class="history-stat-value">${entry.score}/4.0</div>
+                                </div>` : ''}
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Durată</div>
+                                    <div class="history-stat-value">${minutes}m ${seconds}s</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                historyList.innerHTML = html;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeProgressHistory() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+
+        // Close modal on background click
+        document.getElementById('historyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProgressHistory();
+            }
+        });
+
+        // Initialize app
+        loadState();
+        initChapters();
+        updateStats();
+        updateStreak();
+        updateHistoryCount();
+    </script>
+</body>
+</html>

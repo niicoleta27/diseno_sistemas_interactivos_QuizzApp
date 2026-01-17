@@ -1,0 +1,2714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App - 7 Chapters - Interactive Systems Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #0f3460;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #00d9ff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(15, 52, 96, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .timer-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 217, 255, 0.1);
+            border: 2px solid #00d9ff;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            z-index: 1000;
+            display: none;
+        }
+
+        .timer-display.active {
+            display: block;
+        }
+
+        .streak-badge {
+            display: none; /* Hidden as per user request */
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+            z-index: 1000;
+        }
+
+        .review-mode-indicator {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            flex: 1;
+            max-width: 300px;
+            padding: 20px;
+            background: rgba(15, 52, 96, 0.6);
+            border: 2px solid #0f3460;
+            border-radius: 15px;
+            color: #e0e0e0;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: #00d9ff;
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #00d9ff 0%, #0f3460 100%);
+            border-color: #00d9ff;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chapter-card {
+            background: rgba(15, 52, 96, 0.6);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #0f3460;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter-card:hover {
+            border-color: #00d9ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .chapter-card.active {
+            border-color: #00d9ff;
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .chapter-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #00d9ff;
+        }
+
+        .chapter-progress {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff 0%, #00ff88 100%);
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        .quiz-container {
+            background: rgba(15, 52, 96, 0.6);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #0f3460;
+            display: none;
+        }
+
+        .quiz-container.active {
+            display: block;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .question-number {
+            font-size: 1.1em;
+            color: #00d9ff;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: #fff;
+        }
+
+        .answers-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: #00d9ff;
+            transform: translateX(5px);
+        }
+
+        .answer-btn.selected {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: #00d9ff;
+        }
+
+        .answer-btn.correct {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .answer-btn.incorrect {
+            background: rgba(255, 68, 68, 0.2);
+            border-color: #ff4444;
+        }
+
+        .answer-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d9ff 0%, #0f3460 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(15, 52, 96, 0.8);
+            color: #00d9ff;
+            border: 2px solid #00d9ff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .feedback.incorrect {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff9999;
+        }
+
+        .results-container {
+            background: rgba(15, 52, 96, 0.6);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #0f3460;
+            text-align: center;
+            display: none;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        .results-score {
+            font-size: 3em;
+            color: #00d9ff;
+            margin: 20px 0;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+        }
+
+        .results-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .result-item {
+            padding: 20px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            color: #00ff88;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: none; /* Ascuns permanent */
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .history-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .history-content {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border: 2px solid #00d9ff;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.3);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .history-header h2 {
+            color: #00d9ff;
+            margin: 0;
+        }
+
+        .close-history {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff9999;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .close-history:hover {
+            background: rgba(255, 68, 68, 0.4);
+            transform: scale(1.05);
+        }
+
+        .history-item {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: #00d9ff;
+            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.2);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-date {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .history-mode {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .history-mode.learning {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+            color: #667eea;
+        }
+
+        .history-mode.exam {
+            background: rgba(250, 112, 154, 0.2);
+            border: 1px solid #fa709a;
+            color: #fa709a;
+        }
+
+        .history-mode.review {
+            background: rgba(247, 183, 51, 0.2);
+            border: 1px solid #f7b733;
+            color: #f7b733;
+        }
+
+        .history-mode.random {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #764ba2;
+            color: #a78bfa;
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .history-stat {
+            text-align: center;
+            padding: 10px;
+            background: rgba(15, 52, 96, 0.4);
+            border-radius: 8px;
+        }
+
+        .history-stat-label {
+            font-size: 0.85em;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .history-stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .no-history {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0a0;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+            }
+
+            .chapters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .history-content {
+                padding: 20px;
+            }
+
+            .history-details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="save-indicator" id="saveIndicator">Saved ✓</div>
+    <div class="timer-display" id="timerDisplay">⏱️ 00:00</div>
+    <div class="streak-badge" id="streakBadge">🔥 0 zile</div>
+    
+    <div class="container">
+        <header>
+            <h1>📚 Quiz App - 7 Chapters</h1>
+            <p style="color: #a0a0a0; margin-top: 10px;">Learn and practice with questions organized by chapters</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label" id="scoreLabel">Select a chapter</div>
+                <div class="stat-value" id="totalScore">-</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Global Progress</div>
+                <div class="stat-value" id="globalProgress">0%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Complete Chapters</div>
+                <div class="stat-value" id="chaptersComplete">0/7</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Avg Time/Question</div>
+                <div class="stat-value" id="avgTime">0s</div>
+            </div>
+            <div class="stat-item" style="cursor: pointer;" onclick="showProgressHistory()" title="Click to view detailed history">
+                <div class="stat-label">📊 Progress History</div>
+                <div class="stat-value" id="historyCount">0 sessions</div>
+            </div>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" id="learningModeBtn" onclick="setMode('learning')">
+                <div style="font-size: 2em; margin-bottom: 10px;">📖</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Learning Mode</div>
+                <div style="font-size: 0.9em; color: #a0a0a0;">Instant feedback for each question</div>
+            </button>
+            <button class="mode-btn" id="examModeBtn" onclick="setMode('exam')">
+                <div style="font-size: 2em; margin-bottom: 10px;">📝</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Exam Mode</div>
+                <div style="font-size: 0.9em; color: #a0a0a0;">Results at the end, real conditions</div>
+            </button>
+            <button class="mode-btn" id="reviewModeBtn" onclick="setMode('review')">
+                <div style="font-size: 2em; margin-bottom: 10px;">🔄</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Review Mistakes</div>
+                <div style="font-size: 0.9em; color: #a0a0a0;">Repeat only wrong questions</div>
+            </button>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="mode-btn" onclick="startRandomQuiz()" style="display: inline-block; width: auto; padding: 20px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; cursor: pointer;">
+                <div style="font-size: 2em; margin-bottom: 10px;">🎲</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">Random Quiz</div>
+                <div style="font-size: 0.9em; color: rgba(255,255,255,0.8);">40 random questions from all chapters</div>
+            </button>
+        </div>
+
+        <div id="chaptersView">
+            <div class="chapters-grid" id="chaptersGrid"></div>
+        </div>
+
+        <div class="quiz-container" id="quizContainer">
+            <div id="reviewModeIndicator" class="review-mode-indicator" style="display: none;">
+                🔄 Review Mode - Repeating wrong questions
+            </div>
+            
+            <div class="question-header">
+                <span class="question-number" id="questionNumber">Question 1/40</span>
+                <span style="color: #a0a0a0;" id="currentChapter">Chapter 1</span>
+            </div>
+
+            <div class="question-text" id="questionText">
+                Question text will appear here...
+            </div>
+
+            <div class="answers-grid" id="answersGrid"></div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="quiz-controls">
+                <button class="btn btn-secondary" onclick="exitQuiz()">← Back to Chapters</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Next →</button>
+            </div>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <h2 style="color: #00d9ff; margin-bottom: 20px;">🎉 Quiz Results</h2>
+            <div class="results-score" id="finalScore">0.0 points</div>
+            
+            <div class="results-details">
+                <div class="result-item">
+                    <div style="color: #a0a0a0; margin-bottom: 10px;">Correct Answers</div>
+                    <div style="font-size: 2em; color: #00ff88;" id="resultCorrect">0</div>
+                </div>
+                <div class="result-item">
+                    <div style="color: #a0a0a0; margin-bottom: 10px;">Wrong Answers</div>
+                    <div style="font-size: 2em; color: #ff4444;" id="resultIncorrect">0</div>
+                </div>
+                <div class="result-item">
+                    <div style="color: #a0a0a0; margin-bottom: 10px;">Percentage</div>
+                    <div style="font-size: 2em; color: #00d9ff;" id="resultPercentage">0%</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button class="btn btn-primary" onclick="restartQuiz()" style="margin-right: 15px;">🔄 Restart Chapter</button>
+                <button class="btn btn-secondary" onclick="exitToChapters()">← Chapters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="history-modal" id="historyModal">
+        <div class="history-content">
+            <div class="history-header">
+                <h2>📊 Detailed Progress History</h2>
+                <button class="close-history" onclick="closeProgressHistory()">✕ Close</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure for questions
+        const quizData = {
+            1: [ // Chapter 1 - Prototyping
+                {
+                    question: "What is the main consequence of presenting an artificially 'over-dimensioned' prototype in an early stage of the software creation process?",
+                    answers: ["The prototype will surprise the audience with its ambiguity, allowing too much descriptive freedom.", "It leads to premature decision-making and the development of an incorrect software concept.", "It allows the audience to understand the ideas without overwhelming them with superfluous details.", "It facilitates accurate budget estimation by showing high fidelity from the start."],
+                    correct: 1
+                },
+                {
+                    question: "According to Bill Verplank, what is the precise definition of 'prototyping'?",
+                    answers: ["It is the creation of an original model or first mold for the purpose of mass-manufacturing a figure.", "It is any attempt to program the final user interface code for technical validation.", "It is externalizing and materializing a design idea for the purpose of evaluation.", "It is the process of generating exhaustive documentation before starting any tangible representation."],
+                    correct: 2
+                },
+                {
+                    question: "In the context of effective prototyping, which statement is true regarding the required tools and skills?",
+                    answers: ["Advanced graphic software experience is required to create high-quality prototypes.", "You need to be an experienced developer for the prototype to be functional.", "No special tools are needed; you can use almost any available tool, even a word processor.", "Prototyping can only be incorporated if planned from the start of the development schedule, due to its high cost."],
+                    correct: 2
+                },
+                {
+                    question: "Which of the following situations best describes the risk of an 'under-dimensioned' prototype?",
+                    answers: ["The presenter relies excessively on convincing verbal descriptions due to the model's ambiguity.", "The audience focuses too much on superfluous visual details instead of functionality.", "The development team invests too many resources in unnecessary visual fidelity.", "Definitive design decisions are made based on a finalized appearance."],
+                    correct: 0
+                },
+                {
+                    question: "Analyzing the history of prototyping, what was the main purpose of the prototypes created by Leonardo da Vinci?",
+                    answers: ["To define mass production costs and molds needed for manufacturing.", "To serve as proof of concept and innovation, often centuries ahead of the technology needed to build them.", "To communicate designs to stakeholders and evaluate ergonomics with end users.", "To protect intellectual property through quick patents of functional devices."],
+                    correct: 1
+                },
+                {
+                    question: "How did Thomas Edison's prototyping approach differ from Leonardo da Vinci's?",
+                    answers: ["Edison used prototypes exclusively for conceptual exploration without production intent.", "Edison used prototypes to communicate manufacturing requirements and costs, not just as a source of innovation.", "Edison worked alone, while Da Vinci had a team of 200 workers.", "Edison preferred paper sketches and never built functional physical models."],
+                    correct: 1
+                },
+                {
+                    question: "Henry Dreyfuss is considered an archetype of the modern industrial designer. What key methodology, a precursor to user experience (UX) design, did he advocate in his prototyping process?",
+                    answers: ["Design should be done exclusively by engineers to ensure technical viability.", "Models should remain as two-dimensional drawings until the final production phase.", "Interdisciplinary participation of stakeholders in design and user participation in evaluation.", "Product aesthetics is secondary and should not be evaluated through prototypes."],
+                    correct: 2
+                },
+                {
+                    question: "In the context of software, how is the 'content' of a prototype defined?",
+                    answers: ["It's the software tools like Visio or Visual Basic used to create it.", "It's the procedure used, such as wireframes or storyboards.", "It's everything contained in the design, including text, graphics, and navigation structure.", "It's exclusively the source code underlying the graphical interface."],
+                    correct: 2
+                },
+                {
+                    question: "What criticism is raised in the text about the term 'software development'?",
+                    answers: ["It wrongly implies that software is an artistic activity without scientific basis.", "It suggests that software already exists in an ideal form and that the process inexorably ends in the final program, hiding its collaborative nature.", "It's a term that's too modern and doesn't reflect the historical roots of engineering.", "It should be replaced with 'software manufacturing' to resemble hardware production."],
+                    correct: 1
+                },
+                {
+                    question: "According to the text, which of the following is NOT one of the main questions that prototyping helps answer?",
+                    answers: ["Will the design work correctly?", "How will users respond to the design?", "What programming language is most efficient for the backend?", "Can the design be produced economically?"],
+                    correct: 2
+                },
+                {
+                    question: "When using a prototype to answer 'Will the design work correctly?', what specific aspect is being evaluated when we ask if the interface is intuitive and easy to learn?",
+                    answers: ["Customer perception of value.", "Ease of use and learning.", "Look and feel.", "Economic viability of production."],
+                    correct: 1
+                },
+                {
+                    question: "In the software environment, how does the concept of 'economic production' differ from hardware?",
+                    answers: ["In software, cost is calculated by adding the physical price of each component used in the prototype.", "In software, 'economic' is irrelevant because code has no material cost.", "In software, 'economic' depends on organizational values, potentially referring to maintenance effort, support, or time to market.", "In software, economic production is determined solely by the cost of development tool licenses."],
+                    correct: 2
+                },
+                {
+                    question: "What important lesson about user response is drawn from the Apple Newton vs. Palm Pilot case?",
+                    answers: ["Users prefer large devices with more processing power even if they're heavy.", "Handwriting recognition is the most valued feature in any mobile device.", "Prototyping with users would have revealed whether they were willing to carry a bulky device (Newton) versus one that fits in a pocket (Palm Pilot).", "Market success depends exclusively on technological innovation, regardless of usability."],
+                    correct: 2
+                },
+                {
+                    question: "What is meant by 'look and feel' in the context of a software prototype?",
+                    answers: ["It's the combination of interaction techniques and visual design, plus the emotional responses elicited from users.", "It's only the color scheme and corporate logos applied to the interface.", "It's the system's response speed to user requests.", "It's the software's ability to function on different operating systems."],
+                    correct: 0
+                },
+                {
+                    question: "For a start-up seeking venture capital, what is the main value of a high-fidelity prototype?",
+                    answers: ["It serves to calculate exact long-term maintenance costs.", "It demonstrates that the team has worked an idea into something that looks like a product, proving its potential market acceptance.", "It replaces the need for a formal business plan.", "It allows comprehensive quantitative usability testing before having investors."],
+                    correct: 1
+                },
+                {
+                    question: "What is the difference between a qualitative and quantitative testing objective when using prototypes?",
+                    answers: ["Qualitative measures the effectiveness of different task methods (data), while quantitative observes reactions and suggestions.", "Qualitative observes user reaction and gets feedback (suggestions), while quantitative collects data to determine task method effectiveness.", "There's no difference, both seek to find code errors.", "Qualitative uses paper prototypes and quantitative only uses programmed prototypes."],
+                    correct: 1
+                },
+                {
+                    question: "What does the 'blank model prototypes' technique used in generative research consist of?",
+                    answers: ["Using visual design software without adding colors (black and white) to focus on structure.", "Interactive exploration using foam blocks and craft materials for users to design physical form and button positions.", "Giving the user a blank sheet of paper to draw what they want.", "Creating a functional software prototype but without real content (lorem ipsum)."],
+                    correct: 1
+                },
+                {
+                    question: "What is the main purpose of the foam block exercise (blank models)?",
+                    answers: ["To obtain a refined design ready for manufacturing.", "To deceive the user into believing it's a real product.", "To focus on design, physical manipulation, and knowledge obtained from research questions, and nothing more.", "To evaluate the graphical user interface on a simulated screen."],
+                    correct: 2
+                },
+                {
+                    question: "How can a prototype support product design specification?",
+                    answers: ["By completely replacing the need for written documentation and functional requirements.", "By providing a much more concrete and verifiable design specification than standalone functional descriptions.", "By serving only as marketing material, without technical value.", "By increasing ambiguity to allow developers total creative freedom."],
+                    correct: 1
+                },
+                {
+                    question: "How does early rapid prototyping contribute to better budget planning?",
+                    answers: ["It increases initial cost, making accurate estimation impossible.", "It provides a more precise definition of work scope, allowing estimates and schedules with greater confidence.", "It allows skipping the planning phase and moving directly to coding.", "It's irrelevant to budget, since software is unpredictable."],
+                    correct: 1
+                },
+                {
+                    question: "If a company's corporate identity is based on 'elegance', how does this affect the economic prototyping strategy?",
+                    answers: ["You're expected to spend considerable time working on alternatives and refining concepts before choosing a path.", "You should make quick and 'dirty' prototypes to launch the product as soon as possible.", "You should avoid prototyping and trust the senior designer's instinct.", "You prioritize utilitarian functionality over form, reducing the number of prototypes needed."],
+                    correct: 0
+                },
+                {
+                    question: "What relationship does the text establish between prototyping and financial risk reduction?",
+                    answers: ["Prototyping increases financial risk by adding a costly stage to the process.", "Risk is reduced by allowing engineers and managers to estimate actual construction costs of a specific validated design.", "Financial risk is only reduced if the prototype is low fidelity.", "Prototyping eliminates all financial risk by guaranteeing sales success."],
+                    correct: 1
+                },
+                {
+                    question: "What statement is correct about the 'characteristics' of a prototype according to the text?",
+                    answers: ["Only two characteristics exist: high fidelity and low fidelity.", "Characteristics refer exclusively to the software used (e.g. Photoshop).", "There are up to seven general characteristics that allow choosing the appropriate method, beyond the simple high/low fidelity distinction.", "Characteristics are the text documents that accompany the model."],
+                    correct: 2
+                },
+                {
+                    question: "What is a key difference between prototyping 'methods' and 'tools'?",
+                    answers: ["Methods are software (e.g. Word) and tools are procedures (e.g. storyboard).", "Methods are procedures (e.g. paper prototype, wireframes) and tools are the physical or software means used to create them (e.g. Visio, pencil).", "There's no difference, they're synonyms.", "Tools are theoretical and methods are practical."],
+                    correct: 1
+                },
+                {
+                    question: "What does it mean for a prototype to serve for 'testing a big concept'?",
+                    answers: ["It focuses on typographic details and final colors.", "It gets user reactions to the general design direction to allow moving forward to detailed design.", "It's useful only for last-minute code bug fixes.", "It necessarily requires a complete high-fidelity prototype."],
+                    correct: 1
+                },
+                {
+                    question: "According to Leonardo da Vinci's quote in the text, what is 'the trick' of life and invention?",
+                    answers: ["Quickly copying what works.", "Never failing.", "Doing something else after others copy what works.", "Patenting ideas before sharing them."],
+                    correct: 2
+                },
+                {
+                    question: "What role do prototypes play in a company's internal communication ('socialization' of the idea)?",
+                    answers: ["They're artifacts that can attract attention, showing the idea as a proposed reality to stakeholders.", "They serve to confuse the competition if leaked.", "They're useful only for the development team, not for investors or managers.", "They replace team meetings."],
+                    correct: 0
+                },
+                {
+                    question: "Why does the text mention that a prototype 'doesn't need to be perfect' to be effective?",
+                    answers: ["Because users prefer ugly designs.", "Because an effective prototype is a fair mix of concepts that expresses the current state of understanding without overwhelming with superfluous details.", "Because nobody notices errors in a prototype.", "Because the entire prototype will always be discarded."],
+                    correct: 1
+                },
+                {
+                    question: "In the context of 'Will the design work correctly?', what does it mean that 'fragmented' prototyping can be influential?",
+                    answers: ["That the prototype should be broken into physical pieces.", "That testing a specific interactive element (fragment) gives positive or negative results that allow correcting direction before continuing.", "That the design is disorganized.", "That different tools are used for each screen."],
+                    correct: 1
+                },
+                {
+                    question: "Which of the following statements about 'Yes Questions' is FALSE according to the text?",
+                    answers: ["Anyone can prototype if they understand their objectives.", "Almost any tool can be adapted to create a successful prototype.", "Prototyping can only be incorporated if done in the final stage of software design.", "You can prototype on the back of a napkin or using video software."],
+                    correct: 2
+                },
+                {
+                    question: "According to the text, the definition of prototype has changed little in over 90 years. How do both Webster's 1913 dictionary and dictionary.com today classify it?",
+                    answers: ["As a written document of technical specifications.", "As a model of a final product or original form that serves as a base.", "As a virtual augmented reality simulation.", "As an error in the manufacturing process."],
+                    correct: 1
+                },
+                {
+                    question: "What does Henry Dreyfuss's figure teach us about the 'hats' (roles) of a successful industrial designer?",
+                    answers: ["The designer should only wear the 'artist' hat.", "The designer is user, designer, and businessman all in one; cooperates with the manager, engineer, and consumer.", "The designer should isolate themselves from business to maintain artistic purity.", "The designer should focus solely on manufacturing cost reduction."],
+                    correct: 1
+                },
+                {
+                    question: "What motivates software prototyping from the 'competition' point of view?",
+                    answers: ["The need to exactly copy rival products.", "The pressure to stay ahead of the competition.", "The legal obligation to prove no patent has been infringed.", "The desire to hire competitors' employees."],
+                    correct: 1
+                },
+                {
+                    question: "What characteristic of prototypes allows evaluating whether the product is a 'worthwhile investment' for the customer?",
+                    answers: ["Customer perception of value.", "Source code complexity.", "Use of primary colors in the interface.", "Number of pages in the user manual."],
+                    correct: 0
+                },
+                {
+                    question: "Why does the text suggest that software developers have not been the first to deal with prototyping challenges?",
+                    answers: ["Because Egyptian architects already made software.", "Because historical inventors like Da Vinci, Edison, and Dreyfuss already used prototypes for innovation, requirements, and communication.", "Because software doesn't require real prototypes.", "Because prototyping is an exclusive 21st-century invention."],
+                    correct: 1
+                },
+                {
+                    question: "What is the relationship between prototypes and requirements according to the text?",
+                    answers: ["Prototypes should not contain requirements, only graphics.", "Requirements (business, technical, user) are one of the aspects included in a prototype.", "Requirements must be 100% finalized before making the first prototype.", "Prototypes serve to eliminate project requirements."],
+                    correct: 1
+                },
+                {
+                    question: "What statement about 'Participatory Design' appears in the text?",
+                    answers: ["It's a technique where only managers design.", "It's often used in generative research to involve more viewpoints, especially the user's.", "It's an obsolete method replaced by AI.", "It consists of users programming the final software."],
+                    correct: 1
+                },
+                {
+                    question: "What happens with 'look and feel' if it's a 'branded experience'?",
+                    answers: ["It should bond the user with the product.", "It should be generic to save costs.", "It should change every week to maintain interest.", "It's irrelevant, what matters is that it doesn't fail."],
+                    correct: 0
+                },
+                {
+                    question: "What difference in 'scale' was there between Edison's approach and a typical solitary inventor's?",
+                    answers: ["Edison worked totally alone to protect his secrets.", "Edison used a large team of over 200 people divided into small groups to turn ideas into prototypes simultaneously.", "Edison outsourced all work to other countries.", "Edison only made one prototype per year."],
+                    correct: 1
+                },
+                {
+                    question: "In the chapter's conclusions, how is the evolution of prototyping described?",
+                    answers: ["It has gone from being a conceptualization activity to a sophisticated activity that includes strategy, specification, and product planning.", "It has lost importance due to agile methodologies.", "It has been simplified to be just a drawing activity.", "It has become an exclusive activity for systems engineers."],
+                    correct: 0
+                }
+            ],
+            2: [ // Chapter 2 - Effective Prototyping Process
+                {
+                    question: "According to the material on effective prototyping process, what is the fundamental structure proposed to manage this activity?",
+                    answers: ["3 Phases and 9 Steps.", "5 Phases and 12 Steps.", "4 Phases and 11 Steps.", "4 Phases and 10 Steps."],
+                    correct: 2
+                },
+                {
+                    question: "In the context of prototyping 'Scalability', what is the recommended approach if you only have one hour to create a prototype?",
+                    answers: ["Skip the planning phase completely to save time.", "Perform a more superficial planning, but maintain planning aspects.", "Jump directly to Step 6 (Choose tool) to maximize production.", "Dedicate 45 minutes to planning and 15 to execution."],
+                    correct: 1
+                },
+                {
+                    question: "What is the main distinction between 'prototyping requirements' (Step 1) and general 'software requirements'?",
+                    answers: ["They're identical and should be treated as synonyms.", "Prototyping requirements are a subset of software requirements, based on audience and current development state.", "Prototyping requirements focus exclusively on hardware, while software requirements focus on code.", "Software requirements are defined by the client, while prototyping requirements are defined exclusively by the end user."],
+                    correct: 1
+                },
+                {
+                    question: "During Phase I (Planning), Step 2 involves 'Creating a task/screen flow'. Why is this considered a scalable activity?",
+                    answers: ["Because it always requires the participation of the entire development team.", "Because it can only be done using vector diagramming software.", "Because it can range from a small part of the system to the entire system, involving one person or the complete team.", "Because the task flow cannot evolve once defined."],
+                    correct: 2
+                },
+                {
+                    question: "When specifying content and fidelity (Step 3), what methodological approach is suggested to characterize the prototype?",
+                    answers: ["Assign a global fidelity level (low or high) to the entire project.", "First identify the content and then adjust that information to a scale of possible fidelity levels for each content type.", "First choose the software tool and let it dictate fidelity.", "Consult exclusively with the marketing department about branding."],
+                    correct: 1
+                },
+                {
+                    question: "Which of the following is NOT listed in the material as a content type for which a fidelity level should be defined in Step 3?",
+                    answers: ["Visual design.", "Interaction design and navigational model.", "Optimized backend source code.", "System behavior/performance."],
+                    correct: 2
+                },
+                {
+                    question: "According to Phase 2 (Specification), what is the main cited cause of 'ineffective prototyping'?",
+                    answers: ["Lack of budget for expensive tools.", "Not determining appropriate prototype characteristics (Step 4).", "Starting design without a cognitive psychology expert.", "Not performing external usability testing."],
+                    correct: 1
+                },
+                {
+                    question: "In Step 4, when determining characteristics, a risk is mentioned related to the level of detail provided to the target audience. What is this risk?",
+                    answers: ["That the user feels overwhelmed and rejects the product.", "Ineffective use of time, either in development or tests that don't capture necessary feedback.", "That the prototype accidentally becomes the final product.", "That internal stakeholders confuse the prototype with the beta version."],
+                    correct: 1
+                },
+                {
+                    question: "What audience distinction is crucial to make during Step 4?",
+                    answers: ["Between expert and novice users.", "Between PC users and Mac users.", "Between software end users and stakeholders who help build it.", "Between marketing team and sales team."],
+                    correct: 2
+                },
+                {
+                    question: "Step 5 deals with choosing the prototyping method. What happens chronologically in the process before this step?",
+                    answers: ["The software tool is selected (Step 6).", "Prototype characteristics and content are assigned to the most fitting method.", "Exact characteristics are defined (audience, state, speed, etc.).", "Design validation is performed."],
+                    correct: 2
+                },
+                {
+                    question: "When selecting a prototyping tool (Step 6), what is the main recommendation to maximize creative time?",
+                    answers: ["Always use the most modern tool on the market.", "Use a skill set you already possess and a tool you're already familiar with.", "Learn a new tool for each project to stay updated.", "Hire an external expert to handle the tools."],
+                    correct: 1
+                },
+                {
+                    question: "According to the material, what common applications are suggested as prototyping tools that may not have been considered as such?",
+                    answers: ["Photoshop and Illustrator.", "Office applications (Word, Excel, PowerPoint), Visio and Acrobat.", "Figma and Sketch.", "3D modeling tools like AutoCAD."],
+                    correct: 1
+                },
+                {
+                    question: "What is the main focus of Phase III (Design)?",
+                    answers: ["Human resource planning.", "Prototype execution through good design.", "Validation with external users.", "Technical specification of functional requirements."],
+                    correct: 1
+                },
+                {
+                    question: "In Step 7 (Formulate design criteria), what is considered a key factor for creating effective prototypes?",
+                    answers: ["The ability to program in multiple languages.", "The ability to defend the prototype design.", "Using bright colors to attract attention.", "The tool's rendering speed."],
+                    correct: 1
+                },
+                {
+                    question: "According to the text, is it necessary to be a professional designer to formulate design criteria (Step 7)?",
+                    answers: ["Yes, it's an indispensable requirement.", "No, but you must hire one mandatorily.", "No, it's not necessary to become one; you can use best practices from design guides.", "Yes, unless the prototype is low fidelity."],
+                    correct: 2
+                },
+                {
+                    question: "What disciplines are mentioned as sources for design guides in Step 7?",
+                    answers: ["Civil engineering and architecture.", "Cognitive psychology, graphic design, and information design.", "Digital marketing and SEO.", "Project management and administration."],
+                    correct: 1
+                },
+                {
+                    question: "What is the goal of using well-founded design guides according to the material?",
+                    answers: ["To ensure screen creations are not made arbitrarily.", "To increase project cost.", "To make the design incomprehensible to the general public to seem more technical.", "To eliminate the need to explain design decisions."],
+                    correct: 0
+                },
+                {
+                    question: "In Step 8 (Create the prototype), what is the quality of the prototype ultimately based on?",
+                    answers: ["Exclusively on the software tool used.", "On the quality of user research, needs definition, and one's own design exploration/analysis.", "On the visual fidelity of the graphics.", "On the number of screens it contains."],
+                    correct: 1
+                },
+                {
+                    question: "Phase IV (Results) is described in the text as:",
+                    answers: ["The most important and innovative phase of the document.", "A phase that requires no attention.", "A phase thoroughly covered by other texts, so little attention is paid to it here.", "The only phase that requires programming."],
+                    correct: 2
+                },
+                {
+                    question: "Step 9 is called 'Review the prototype'. With which group are these reviews mainly conducted according to the source?",
+                    answers: ["With end users exclusively.", "With internal stakeholders.", "With external quality auditors.", "With the general public on social media."],
+                    correct: 1
+                },
+                {
+                    question: "What is the fundamental difference between Step 9 (Review) and Step 10 (Validate)?",
+                    answers: ["Step 9 is technical and Step 10 is financial.", "Step 9 is with internal stakeholders to ensure it progresses, and Step 10 is with external stakeholders/usability.", "Step 9 uses high-fidelity prototypes and Step 10 uses low-fidelity.", "There's no difference, they're synonyms."],
+                    correct: 1
+                },
+                {
+                    question: "What activity is specifically associated with Step 10 'Validate the design'?",
+                    answers: ["Choosing the software tool.", "Creating the task flow.", "Usability testing.", "Formulating cognitive psychology criteria."],
+                    correct: 2
+                },
+                {
+                    question: "Step 11 is 'Implement the design.' What does this step imply in the context of a new technology incubation process?",
+                    answers: ["Sell the patent immediately.", "Translate the iterative prototype into a product or service concept.", "Discard the prototype and start from scratch with real code.", "Hire a marketing team."],
+                    correct: 1
+                },
+                {
+                    question: "For what type of profile is the 'Results' section (Phase 4) especially useful according to the introduction of that phase?",
+                    answers: ["For the expert who has been prototyping for 20 years.", "For the beginner who has little experience in creating a prototype and converting it into a product.", "For the manager who is only interested in the budget.", "For the backend developer who does not interact with users."],
+                    correct: 1
+                },
+                {
+                    question: "In Phase 1, Step 3 (Specify content and fidelity), 'information design' is mentioned. To which category does this element belong?",
+                    answers: ["To the prototyping methods.", "To the types of prototype contents that require a level of fidelity.", "To the software tools.", "To the external validation phase."],
+                    correct: 1
+                },
+                {
+                    question: "Why is it said in the material that prototyping is used to 'communicate'?",
+                    answers: ["Because it replaces email in the company.", "Because it serves to communicate software requirements, designs and ideas.", "Because it is used exclusively for external marketing.", "Because it is a real-time chat tool."],
+                    correct: 1
+                },
+                {
+                    question: "What characteristic do 'ideas' have in the software creation process according to the introduction?",
+                    answers: ["They are static and immutable.", "They must be perfect from the first moment.", "They can be iterated, changed and refined.", "They are not relevant to prototyping."],
+                    correct: 2
+                },
+                {
+                    question: "Regarding the scalability of planning: The text mentions that if 2 weeks are dedicated to prototyping, spending half a day planning 'is not reasonable.' What principle does this illustrate?",
+                    answers: ["That planning should always last 50% of the time.", "That the process steps must be scaled to adjust the prototyping activity.", "That planning is a waste of time on long projects.", "That the 'waterfall' method should be used."],
+                    correct: 1
+                },
+                {
+                    question: "In Step 2, it is mentioned that it is often not easy to know the task flow. What additional element must be understood to do it correctly?",
+                    answers: ["The client's budget.", "The context in which the task is developed.", "The operating system version.", "The final programming language."],
+                    correct: 1
+                },
+                {
+                    question: "What elements define the beginning and end of Phase 2 (Specification) in terms of its steps (4, 5, 6)?",
+                    answers: ["They begin with validation and end with implementation.", "They begin with the definition of characteristics and end with selecting a tool.", "They begin with the task flow and end with visual design.", "They begin with planning and end with results."],
+                    correct: 1
+                },
+                {
+                    question: "What is included in the Step 5 material to help in choosing the appropriate method?",
+                    answers: ["A free software license.", "A table and a worksheet.", "A video tutorial.", "A virtual consultant."],
+                    correct: 1
+                },
+                {
+                    question: "Which of the following is a prototype characteristic listed in Step 4?",
+                    answers: ["Longevity.", "Market price.", "File weight.", "Number of pixels."],
+                    correct: 0
+                },
+                {
+                    question: "What relationship does the text establish between the 'experienced prototyper' and Phase III (Design)?",
+                    answers: ["That the experienced one skips this phase.", "That for the experienced one, good design is already part of their professional practice, so the steps may seem simple.", "That the experienced one finds this phase extremely difficult.", "That the experienced one delegates this phase to novices."],
+                    correct: 1
+                },
+                {
+                    question: "What does Phase III provide for the 'novice prototyper'?",
+                    answers: ["A software license.", "A practical guide for learning to create prototypes, including basic steps and best practices.", "A list of designer prices.", "A certification exam."],
+                    correct: 1
+                },
+                {
+                    question: "In the context of Step 2, what question must be answered about user interaction?",
+                    answers: ["How long does the page take to load?", "What happens when the user clicks on a certain widget (or why do they want to click)?", "What color is the widget?", "Who programmed the widget?"],
+                    correct: 1
+                },
+                {
+                    question: "What phase covers the results of decisions made in the first three steps to enable action?",
+                    answers: ["Phase 1: Planning.", "Phase 2: Specification.", "Phase 3: Design.", "Phase 4: Results."],
+                    correct: 1
+                },
+                {
+                    question: "What is the last step of the complete 11-step process?",
+                    answers: ["Validate the design.", "Implement the design.", "Review the prototype.", "Launch to market."],
+                    correct: 1
+                },
+                {
+                    question: "What is meant by 'effective prototyping' in the introduction?",
+                    answers: ["A process exclusive to senior engineers.", "A process that anyone interested can carry out to manage prototyping in software creation.", "A process automated by AI.", "A process that guarantees zero errors in the final code."],
+                    correct: 1
+                },
+                {
+                    question: "What is the relationship between design decisions and the general public in Step 7?",
+                    answers: ["The design must be cryptic to protect intellectual property.", "Even if it is not the 'best design,' it must be understandable to the general public.", "The general public does not matter, only the stakeholders.", "The design should only be understandable to developers."],
+                    correct: 1
+                },
+                {
+                    question: "What steps make up 'Phase 4: Results'?",
+                    answers: ["Steps 7, 8 and 9.", "Steps 9, 10 and 11.", "Steps 10 and 11 only.", "Steps 8, 9, 10 and 11."],
+                    correct: 1
+                }
+            ],
+            3: [ // Chapter 3 - Prototype Planning
+                {
+                    question: "According to Bill Buxton's perspective cited in the prototyping introduction, what is the 'demonstrable myth' around which much of the software industry is organized?",
+                    answers: ["That low-fidelity prototypes are useless for commercial validation.", "That we know exactly what we want at the beginning and how to achieve it, assuming a direct and optimal path.", "That the cost of fixing errors increases exponentially if detected in the early design phases.", "That functional requirements must be defined exclusively by the marketing team before starting the design."],
+                    correct: 1
+                },
+                {
+                    question: "In the context of prototype planning, what is the fundamental relationship between 'assumptions' and 'requirements' at the beginning of the process?",
+                    answers: ["Requirements must be completely closed before formulating any design assumptions.", "The use of assumptions should be avoided as they increase the risk of the software project.", "Prototyping begins with few requirements and is based on assumptions that will be validated, invalidated or modified.", "Assumptions permanently replace technical requirements when these are not available."],
+                    correct: 2
+                },
+                {
+                    question: "Which of the following methods is described as effective for obtaining the necessary 'context' that goes beyond mere assumptions and requirements?",
+                    answers: ["Exclusively conducting a technical competition analysis.", "First creating a task flow and then writing a scenario that fulfills that flow.", "Directly developing the final code to see how the user reacts in real time.", "Prioritizing only business/marketing requirements before any visual design."],
+                    correct: 1
+                },
+                {
+                    question: "According to the material, what main categories of requirements should be balanced before creating an effective prototype?",
+                    answers: ["Aesthetic, Political, Economic and Temporal.", "Business/marketing, Functional, Technical and Usability.", "Hardware, Software, Network and Database.", "Client, Developer, Investor and End User."],
+                    correct: 1
+                },
+                {
+                    question: "In 'Iteration 2' of the described prototyping process (from quick wireframe to wireframe), what visual element helps clarify business requirements?",
+                    answers: ["The use of high-fidelity colors and definitive logos.", "The inclusion of functional HTML code in the buttons.", "The detailed narrative of the user scenario.", "The buttons and navigation bar shown in the wireframe prototype."],
+                    correct: 3
+                },
+                {
+                    question: "What function does the spreadsheet (Worksheet 3.1) fulfill in the process of transforming assumptions into requirements?",
+                    answers: ["Automatically generate the prototype's source code.", "Support the three-step process: Gather, Inventory and Prioritize.", "Define exclusively the economic costs of the project.", "Create the task flow diagrams graphically."],
+                    correct: 1
+                },
+                {
+                    question: "What characteristic distinguishes a 'swim lane diagram' from a simple dependency diagram?",
+                    answers: ["It only shows tasks without assigning responsible parties.", "It visualizes steps, interrelationships and complex process flow by assigning tasks to specific roles (who does what).", "It is used exclusively in industrial manufacturing and not in software development.", "It is a narrative representation written in prose of the user story."],
+                    correct: 1
+                },
+                {
+                    question: "In a dependency diagram, what do the 'clusters' of tasks indicate?",
+                    answers: ["Errors in the flow definition that must be eliminated.", "The areas where the software will have worse performance.", "Key tasks that are the most significant and first candidates to include in the prototype.", "Secondary tasks that can be ignored in the first version."],
+                    correct: 2
+                },
+                {
+                    question: "What defines a 'Use Scenario' according to the provided material?",
+                    answers: ["It is a technical diagram of the server architecture.", "It is the narration of a task flow in a specific context, such as a critical incident or everyday story.", "It is a list of technical specifications without context.", "It is a high-fidelity prototype ready for production."],
+                    correct: 1
+                },
+                {
+                    question: "When writing a scenario using the movie script structure, what does the 'antagonist' represent?",
+                    answers: ["The user's boss who forces them to work.", "A hacker trying to break the system.", "The constraints or limitations that try to prevent the protagonist from achieving their goal.", "The software product's competition."],
+                    correct: 2
+                },
+                {
+                    question: "What is the purpose of 'Worksheet 4.1: Task Flow step to requirements mapping'?",
+                    answers: ["Calculate the project budget.", "Identify the necessary elements on the screen by mapping task flow steps with requirements/assumptions.", "Create the final graphic design of the logo.", "Prioritize marketing features over usability."],
+                    correct: 1
+                },
+                {
+                    question: "What is meant by 'Low Fidelity' in the context of prototyping?",
+                    answers: ["Prototypes that use a beta version of current software.", "Detailed visual interfaces created with tools like Photoshop.", "Sketches with vaguely formed attributes that allow conceptualizing the initial design.", "Prototypes that include all system functionality and final behavior."],
+                    correct: 2
+                },
+                {
+                    question: "What risk does basing software development mainly on unvalidated assumptions entail?",
+                    answers: ["It significantly reduces project cost.", "It increases risk; the more software is based on assumptions, the greater the risk.", "It accelerates development time without negative consequences.", "It guarantees that the final product will be innovative."],
+                    correct: 1
+                },
+                {
+                    question: "In a swim lane diagram, what geometric shape commonly represents a 'decision point'?",
+                    answers: ["A circle.", "A rectangle.", "A diamond.", "A triangle."],
+                    correct: 2
+                },
+                {
+                    question: "What does 'Information Design' comprise within the content of a prototype?",
+                    answers: ["The visual language and composition of aesthetic elements.", "The design and structure of information, including data entry, menus, tables and graphics.", "The way the system responds to user actions (flow between screens).", "The writing of help texts and editorial content."],
+                    correct: 1
+                },
+                {
+                    question: "What fidelity adjustment technique is specifically suggested for information design?",
+                    answers: ["Advanced Photoshop.", "Card Sorting.", "Server stress tests.", "Marketing interviews."],
+                    correct: 1
+                },
+                {
+                    question: "According to iteration 4 (from storyboard to paper prototype), what happens with the requirements?",
+                    answers: ["They are frozen and can no longer be changed.", "They begin to be validated quickly, especially through direct contact with external users.", "They become more abstract and less tangible.", "They are discarded to focus only on aesthetics."],
+                    correct: 1
+                },
+                {
+                    question: "What is the danger of presenting a prototype with 'high functionality' or very finished appearance too soon?",
+                    answers: ["That the client pays too quickly.", "That you achieve the opposite of the desired effect, diverting attention from structural problems or creating false expectations.", "That the system runs too slowly.", "There is no danger, high fidelity is always better."],
+                    correct: 1
+                },
+                {
+                    question: "What elements define 'Interaction Design' in a prototype?",
+                    answers: ["The color palette and typography.", "The structure and flow within a screen and between screens, and how the system responds to actions.", "The loading speed of the database.", "The accuracy of the data displayed in tables."],
+                    correct: 1
+                },
+                {
+                    question: "In the process of prioritizing requirements for the prototype, what important distinction is made?",
+                    answers: ["Priority for inclusion in the prototype vs. priority for application in the final software.", "Priority of developers vs. priority of designers.", "Economic priority vs. temporal priority.", "Hardware priority vs. software priority."],
+                    correct: 0
+                },
+                {
+                    question: "What is a 'Wireframe' according to the iterations shown in topic 3.1?",
+                    answers: ["A paper mock-up drawn freehand.", "A low/medium fidelity visual representation showing structure and functionality (e.g. buttons, navigation) before detailed visual design.", "The final compiled code.", "A text document without images."],
+                    correct: 1
+                },
+                {
+                    question: "What does 'Iteration 6: from code prototype to software requirements' mean?",
+                    answers: ["That programming starts from scratch without looking at the prototype.", "That the requirements specification is finally derived from a validated high-fidelity prototype, allowing requirements to be 'frozen'.", "That the prototype has failed and one must return to the initial requirements.", "That an external requirements team must be hired."],
+                    correct: 1
+                },
+                {
+                    question: "What do 'Scenarios' contribute to usability validation?",
+                    answers: ["Automated load tests.", "A real-life story that helps validate whether the design fits the context and needs of the user.", "UML class diagrams.", "A detailed marketing budget."],
+                    correct: 1
+                },
+                {
+                    question: "In the example of the swim lane diagram for an expense report, who are some of the identified 'roles'?",
+                    answers: ["Server, Client, Router.", "Employee, T&E System, Manager, Accounting System.", "User A, User B, User C.", "Start, Process, End."],
+                    correct: 1
+                },
+                {
+                    question: "What adjustment method is mentioned for 'Interaction design and navigational model' that involves explaining what will happen even though it is not functional?",
+                    answers: ["Full narration.", "Full interaction.", "Java programming.", "Vector graphic design."],
+                    correct: 1
+                },
+                {
+                    question: "What is the first step in creating a scenario (based on the plot scheme)?",
+                    answers: ["Mark the points on the scheme.", "Outline the plot (write a short paragraph of how a user would apply the functionality).", "Choose the cast.", "Outline the plot with rich details."],
+                    correct: 1
+                },
+                {
+                    question: "What should be done with 'Worksheet 5.1: Determining Content fidelity'?",
+                    answers: ["Send it to the client to sign as a contract.", "Use it to decide the appropriate level of fidelity (low, medium, high) for each type of content (information, interaction, visual, etc.).", "Ignore it if the project is small.", "Use it to calculate programming hours."],
+                    correct: 1
+                },
+                {
+                    question: "What type of requirements define 'the functionality necessary to support business requirements'?",
+                    answers: ["Usability Requirements.", "Technical Requirements.", "Functional Requirements.", "Marketing Requirements."],
+                    correct: 2
+                },
+                {
+                    question: "What does 'validation' imply in the context of requirements prototyping?",
+                    answers: ["Checking that the code has no syntax errors.", "Confirming, invalidating, modifying or replacing assumptions and requirements early in the process.", "Obtaining budget approval from the finance department.", "Ensuring that the logo complies with the style guide."],
+                    correct: 1
+                },
+                {
+                    question: "What element allows 'telling the story in the context of the software' during Iteration 3?",
+                    answers: ["The class diagram.", "The Storyboard.", "The database server.", "The budget spreadsheet."],
+                    correct: 1
+                },
+                {
+                    question: "What is recommended if an initial requirements list is 'short and imprecise'?",
+                    answers: ["Start programming immediately to save time.", "Assume that we are in the early stages and recognize that we are open to interpretation and unvalidated assumptions.", "Consider that the project is in final stages.", "Discard the project due to lack of information."],
+                    correct: 1
+                },
+                {
+                    question: "What does 'Editorial Content' include in the fidelity of a prototype?",
+                    answers: ["The application's source code.", "The tone of voice, text style and written information for the user.", "Decorative images only.", "The database structure."],
+                    correct: 1
+                },
+                {
+                    question: "Why is it important to 'share the prototype with main stakeholders'?",
+                    answers: ["So they learn to program.", "To ensure complete coverage of requirements (business, functional, technical, usability).", "To sell them the product before finishing it.", "So they design the graphical interface.", ],
+                    correct: 1
+                },
+                {
+                    question: "In the 'Rebecca' example (Asma Ceramics), what action does the user perform that denotes a specific task flow?",
+                    answers: ["Program the website in HTML.", "Subscribe to an email alert and then click on the link when it arrives.", "Call technical support by phone.", "Design the ceramic logo."],
+                    correct: 1
+                },
+                {
+                    question: "What fidelity level is described as 'a beta version of current software'?",
+                    answers: ["Low fidelity.", "Medium fidelity.", "High fidelity.", "Very high fidelity."],
+                    correct: 3
+                },
+                {
+                    question: "What technique is mentioned as useful for obtaining usability requirements?",
+                    answers: ["Competitive analysis and task analysis.", "Source code review.", "Financial audit.", "Entity-relationship diagram."],
+                    correct: 0
+                },
+                {
+                    question: "What is the last step in the process of creating a swim lane diagram?",
+                    answers: ["List the roles.", "Place tasks sequentially.", "Identify and visualize interrelationships (decision points, system interaction, handoffs).", "Delete the diagram and start over."],
+                    correct: 2
+                },
+                {
+                    question: "What does the 'inventory phase' represent in the requirements worksheet?",
+                    answers: ["Count how many computers are in the office.", "List and classify the current requirements and assumptions of the project.", "Purchase the necessary software licenses.", "Prioritize what will be programmed first."],
+                    correct: 1
+                },
+                {
+                    question: "What relationship does 'Visual Design' have with the software structure?",
+                    answers: ["Visual design should hide the structure so it is not visible.", "Visual design uses elements to express the structure and message of the software to users.", "Visual design is independent and has no relationship with the structure.", "The structure should be eliminated in favor of attractive visual design."],
+                    correct: 1
+                },
+                {
+                    question: "Why is it said that the first prototype usually raises 'more questions than it resolves'?",
+                    answers: ["Because it is poorly designed by definition.", "Because as the first visualization of the software, it brings up new questions and requirements that had not been considered.", "Because users don't know what they want.", "Because it is a waste of time and resources."],
+                    correct: 1
+                }
+            ],
+            4: [ // Chapter 4 - Prototype Design
+                {
+                    question: "In the context of the prototyping cycle, what is the fundamental distinction of the focus in the second phase (characteristics determination) compared to the previous phase?",
+                    answers: ["It focuses on who is going to use the system.", "The how is determined, instead of the what.", "Coding is prioritized over visual design.", "The economic cost of the project is defined exclusively."],
+                    correct: 1
+                },
+                {
+                    question: "To facilitate modular creation and understanding of the problems they encompass, how should the prototype structure be treated?",
+                    answers: ["It should be kept as a monolithic block to ensure coherence.", "It should be broken down into small pieces.", "It should be developed linearly without divisions.", "It should be completely outsourced to external teams."],
+                    correct: 1
+                },
+                {
+                    question: "Which of the following is NOT one of the 8 main characteristics to determine for prototype creation according to the syllabus?",
+                    answers: ["Longevity.", "Profitability.", "Fidelity.", "Audience."],
+                    correct: 1
+                },
+                {
+                    question: "According to the theory about Internal Audience, why are these users usually more tolerant than external ones?",
+                    answers: ["Because they don't care about the quality of the final product.", "Because they are more familiar with the engineering processes that occur.", "Because they have less time to review the prototype.", "Because they prefer high-fidelity prototypes exclusively."],
+                    correct: 1
+                },
+                {
+                    question: "What do design team members (Internal Audience) initially expect to see after brainstorming sessions?",
+                    answers: ["A prototype with little definition.", "A finished final product.", "A complete user manual.", "A marketing cost analysis."],
+                    correct: 0
+                },
+                {
+                    question: "Within the Internal Audience, what is the main responsibility of quality control engineers (QA)?",
+                    answers: ["Define the project budget.", "Create appropriate test cases to evaluate the software.", "Present the product to investors.", "Design the final graphical interface."],
+                    correct: 1
+                },
+                {
+                    question: "What specific value do Domain Specialists and Analysts bring as internal audience?",
+                    answers: ["Knowledge about HTML programming.", "Experience and specialized knowledge about the markets the offering targets.", "Ability to finance the project.", "Skills in vector graphic design."],
+                    correct: 1
+                },
+                {
+                    question: "Unlike the internal audience, what does an External Audience generally expect to find?",
+                    answers: ["A technical flowchart.", "A conceptual narrative.", "More a final product than a prototype.", "A low-fidelity prototype to co-design."],
+                    correct: 2
+                },
+                {
+                    question: "What critical advantage does the External Audience offer during the testing process?",
+                    answers: ["They are usually more tolerant of code errors.", "They capture errors that the development team could not imagine existed.", "They reduce the cost of prototyping tools.", "They speed up the backend programming process."],
+                    correct: 1
+                },
+                {
+                    question: "What preference of style and interactivity distinguishes the external audience from the internal?",
+                    answers: ["They prefer narrative over interactivity.", "They prefer low fidelity and narrative.", "They require a higher level of fidelity and interactivity.", "They prefer static paper schemes."],
+                    correct: 2
+                },
+                {
+                    question: "Which of the following questions is relevant to consider about the Internal Audience?",
+                    answers: ["Is the audience an end user?", "How friendly is your audience?", "To what extent can common understanding be assumed?", "Are they willing to pay for the prototype?"],
+                    correct: 2
+                },
+                {
+                    question: "Regarding the 'State' characteristic of the prototype, what is the purpose of an 'Early' state?",
+                    answers: ["Validate the final code.", "Test assumptions.", "Conduct sales demonstrations.", "Check the visual integrity of the interface."],
+                    correct: 1
+                },
+                {
+                    question: "What characteristic defines 'Diligent' Speed in prototyping?",
+                    answers: ["It is used to generate quick and disposable ideas.", "It allows expressing precise details and is effective for sales.", "It is exclusive to the initial design phases.", "It is done with freehand sketches on napkins."],
+                    correct: 1
+                },
+                {
+                    question: "In terms of 'Longevity', what main dilemma does the design team face?",
+                    answers: ["Whether the prototype will be physical or digital.", "Whether the prototype will be disposable, or will evolve toward the final design.", "Whether the prototype will cost a lot or little money.", "Whether the prototype will be tested by experts or novices."],
+                    correct: 1
+                },
+                {
+                    question: "According to the guide for selecting characteristics, what does the correct understanding of 'Media' (Physical/Digital) allow avoiding?",
+                    answers: ["Avoid constantly reinventing the wheel.", "Spending too much time on details.", "Inadequate audience participation.", "Misunderstandings about the user domain."],
+                    correct: 0
+                },
+                {
+                    question: "What prototyping method is described as abstract, interactive and participative, used in the early stages to determine navigation structure?",
+                    answers: ["Storyboard.", "Card Sorting.", "Wizard of Oz.", "Wireframe."],
+                    correct: 1
+                },
+                {
+                    question: "In the context of the 'Card Sorting' method described in the methods topic, who is the main audience (recipient)?",
+                    answers: ["External investors.", "End users exclusively.", "Internal design team members.", "Market competitors."],
+                    correct: 2
+                },
+                {
+                    question: "What is a key characteristic of 'Paper' prototyping?",
+                    answers: ["It requires advanced software tools.", "The interface is, in general, completely functional (simulated).", "It is reserved exclusively for the final sales stage.", "It does not allow voice input or manual interaction."],
+                    correct: 1
+                },
+                {
+                    question: "Until when is it recommended to use 'Paper' prototyping?",
+                    answers: ["Until all important design issues are resolved.", "Only during the first brainstorming meeting.", "Until the client pays the advance.", "Only after having coded the backend."],
+                    correct: 0
+                },
+                {
+                    question: "What fundamentally defines a 'Digital' prototype according to the material?",
+                    answers: ["It is a compiled final application.", "It is a digital version of the paper prototype.", "It is a marketing video.", "It is complex code in C++."],
+                    correct: 1
+                },
+                {
+                    question: "In what situations do 'Focus Groups' especially benefit from the use of digital prototypes?",
+                    answers: ["When there is no electricity.", "For idea creation sessions and storyboards.", "For source code validation.", "For server load testing."],
+                    correct: 1
+                },
+                {
+                    question: "What does the 'Wizard of Oz' method consist of?",
+                    answers: ["An AI algorithm generates responses automatically.", "A team member simulates the system's responses from an adjacent room.", "The end user imagines the system works without interacting with anything.", "Magic software is used to create visual effects."],
+                    correct: 1
+                },
+                {
+                    question: "For what type of interfaces is the 'Wizard of Oz' method adaptation especially useful in early stages?",
+                    answers: ["Command-line interfaces exclusively.", "Interfaces that include voice information and voice feedback.", "SQL databases.", "Static HTML web pages."],
+                    correct: 1
+                },
+                {
+                    question: "What statement is correct about the relationship between methods and results in prototyping?",
+                    answers: ["All methods achieve the same result.", "The same method should always be used for all projects.", "Different methods achieve different results.", "The method does not influence the final result."],
+                    correct: 2
+                },
+                {
+                    question: "When choosing a prototyping tool (Topic 4.3), what are the two main performance criteria sought in project work?",
+                    answers: ["Price and Popularity.", "Effectiveness and Efficiency.", "Color and Shape.", "Hardware and Software."],
+                    correct: 1
+                },
+                {
+                    question: "If a team needs to perform a quick 'Proof of concept' that can be easily incorporated into a design presentation, what Medium is most suggested by the text?",
+                    answers: ["Physical.", "Digital.", "Wizard of Oz.", "Coded."],
+                    correct: 1
+                },
+                {
+                    question: "What 'Speed' characteristic is appropriate for a prototype that will serve as a sales tool and marketing demonstration?",
+                    answers: ["Quick.", "Diligent.", "Draft.", "Conceptual."],
+                    correct: 1
+                },
+                {
+                    question: "In the guide for selecting characteristics, what is the first step (step 1)?",
+                    answers: ["Analyze the expression.", "Determine the style.", "Specify basic requirements: Audience and Time.", "Choose the software tool."],
+                    correct: 2
+                },
+                {
+                    question: "What is confirmed by correctly understanding the 'Speeds' according to the selection guide?",
+                    answers: ["That the audience is external.", "That you are not spending too much or too little time on the prototype details.", "That the prototype is interactive.", "That the medium is digital."],
+                    correct: 1
+                },
+                {
+                    question: "If you are defining the appropriate level of audience participation, what characteristic are you mainly analyzing?",
+                    answers: ["Speed.", "Longevity.", "Style (Narrative vs Interactive).", "Medium."],
+                    correct: 2
+                },
+                {
+                    question: "When a domain specialist (External Audience) is hired, what work cycle do they usually follow?",
+                    answers: ["Only the coding phase.", "From checking design integrity to market acceptance.", "Only the brainstorming phase.", "Only the post-sale technical support phase."],
+                    correct: 1
+                },
+                {
+                    question: "What prototyping tool is explicitly mentioned as the most suitable for all situations in the text?",
+                    answers: ["Card Sorting.", "Wireframe.", "No single universal tool is mentioned; you should choose the one that best fits.", "HTML/Scripting."],
+                    correct: 2
+                },
+                {
+                    question: "What prototyping method includes 'White model' and 'Video' in its list?",
+                    answers: ["They are not prototyping methods.", "They are characteristics, not methods.", "They are prototyping methods listed in Topic 4.2.", "They are audience types."],
+                    correct: 2
+                },
+                {
+                    question: "Why is it crucial to determine if the audience is Internal or External at the beginning of prototyping?",
+                    answers: ["To decide who pays for lunch.", "Because external audiences expect final products and detect unimaginable errors, while internal ones are more tolerant.", "Because the internal audience always requires high-fidelity prototypes.", "Because the external audience prefers narrative over interactivity."],
+                    correct: 1
+                },
+                {
+                    question: "In the context of 'Longevity', if a prototype becomes the final design of the intended program, what type of longevity are we implicitly talking about?",
+                    answers: ["Short (throwaway).", "Long (evolutionary/final).", "Nonexistent.", "Conceptual."],
+                    correct: 1
+                },
+                {
+                    question: "What is meant by 'Expression' within the prototype characteristics?",
+                    answers: ["Whether it is physical or digital.", "Whether it is quick or diligent.", "Whether it is conceptual or experiential.", "Whether it is internal or external."],
+                    correct: 2
+                },
+                {
+                    question: "What type of prototype would be most suitable for verifying terminology used in information architecture with the internal team?",
+                    answers: ["High-definition video.", "Card Sorting.", "Coded prototype in C++.", "Voice Wizard of Oz."],
+                    correct: 1
+                },
+                {
+                    question: "What does it imply when a prototype has 'low' fidelity?",
+                    answers: ["That it works perfectly without errors.", "That it resembles the final product little in detail and finish.", "That it is made only in digital format.", "That it is aimed at a demanding external audience."],
+                    correct: 1
+                },
+                {
+                    question: "What is the risk of not correctly determining characteristics before prototyping?",
+                    answers: ["That the software is too cheap.", "Wasting design resources on redundant or unnecessary activities.", "That the internal audience becomes intolerant.", "That too many tools are used at once."],
+                    correct: 1
+                },
+                {
+                    question: "What element is used in Topic 4.3 to help in the tool decision process?",
+                    answers: ["A crystal ball.", "A worksheet.", "A complex algorithm.", "A show of hands vote."],
+                    correct: 1
+                }
+            ],
+            5: [ // Chapter 5 - Design Criteria and Creation
+                {
+                    question: "In the context of the prototyping cycle, what is the main objective of the third phase (Establish design criteria)?",
+                    answers: ["Code the final interface using software development tools.", "Determine how information and tools will be used, as well as the organization and navigation of the prototype.", "Conduct usability testing with end users to validate the color scheme.", "Define business requirements and project budget."],
+                    correct: 1
+                },
+                {
+                    question: "When selecting design criteria, in addition to categorizing them as visual design or user interface, what additional attribute is given to each guideline?",
+                    answers: ["Priority or Cost.", "Aesthetics or Functionality.", "Organization or Direction.", "Accessibility or Usability."],
+                    correct: 2
+                },
+                {
+                    question: "What is the main function of an 'organizational' type guideline within design criteria?",
+                    answers: ["Guide the user's eye through the screen.", "Determine the system response speed.", "Help in deciding where to place elements in the layout of a screen or page.", "Establish the color scheme and typography."],
+                    correct: 2
+                },
+                {
+                    question: "According to the Visual Design Guidelines, what fundamental rule governs 'Information flow'?",
+                    answers: ["The largest elements should always go in the center.", "Aesthetics should be prioritized over functionality.", "Always place the most important information at the first (priority) points.", "Information should be hidden until the user requests it."],
+                    correct: 2
+                },
+                {
+                    question: "What effect does proper information flow have on a screen according to the exposed theory?",
+                    answers: ["It makes the screen more colorful.", "It facilitates reading and navigation by making critical elements easier to find and identify.", "It increases the user's cognitive load to maintain their attention.", "It reduces the available white space in the interface."],
+                    correct: 1
+                },
+                {
+                    question: "Within the User Interface Guidelines, what key question helps define interaction design?",
+                    answers: ["How many colors does the user's monitor support?", "What is the budget for backend development?", "How does the interface behave and respond to user interaction?", "What database will be used to store information?"],
+                    correct: 2
+                },
+                {
+                    question: "Which of the following guidelines is classified as a 'User Interface' guideline and has a 'Directional' attribute?",
+                    answers: ["Logical grouping.", "Typographic structure.", "Progressive disclosure.", "Universal accessibility."],
+                    correct: 2
+                },
+                {
+                    question: "What technique is NOT considered a 'Progressive disclosure' strategy according to the material?",
+                    answers: ["Command menus.", "Property sheets.", "Infinite scrolling.", "Links."],
+                    correct: 2
+                },
+                {
+                    question: "Regarding the 'Efficiency' guideline, what recommendation is made about scrolling?",
+                    answers: ["Scrolling should be used in both directions (horizontal and vertical) to maximize space.", "Scrolling is preferable to pagination in all cases.", "If scrolling is used, only one direction should be chosen (preferably vertical).", "Scrolling should be automatic without user intervention."],
+                    correct: 2
+                },
+                {
+                    question: "What does 'Learnability' imply in prototype design?",
+                    answers: ["That the user must read the manual before using the system.", "That the user should be able to reuse current and acquired knowledge to learn to use the rest of the application.", "That the interface should be completely new and original, without resembling previous systems.", "That the system should have a mandatory tutorial at the start."],
+                    correct: 1
+                },
+                {
+                    question: "What is the first strategy mentioned to achieve 'Learnability'?",
+                    answers: ["Use the greatest number of icons possible.", "Leverage users' knowledge and experience through the use of metaphors and interaction models.", "Reduce the number of menu options.", "Use bright colors to attract attention."],
+                    correct: 1
+                },
+                {
+                    question: "To improve learnability, the material suggests using familiar conventions for the user. What elements are specifically mentioned as examples of these conventions?",
+                    answers: ["Encryption algorithms.", "Interaction models, menu designs, icons and widgets.", "Latest generation hardware.", "Backend programming languages."],
+                    correct: 1
+                },
+                {
+                    question: "According to the third strategy of 'Learnability', what should be done with interaction methods?",
+                    answers: ["Change them frequently to maintain user interest.", "Offer multiple different methods for the same action on the same screen.", "Continue using the same method during the interaction process as much as possible (consistency).", "Eliminate interaction and make the process automatic."],
+                    correct: 2
+                },
+                {
+                    question: "What does the guideline 'Speak the audience's language' mean?",
+                    answers: ["That the interface should be translated into all possible languages.", "That the system should include voice recognition.", "That the editorial and visual language should include terms, images and semantics that the audience understands.", "That precise technical jargon should be used to demonstrate professionalism."],
+                    correct: 2
+                },
+                {
+                    question: "Which of the following is a rule for explicitly showing required actions?",
+                    answers: ["Hide required actions until the end of the form.", "Use a consistent convention to indicate a required action.", "Vary requirement indicators to avoid monotony.", "Assume that the user knows which fields are mandatory without indicating it."],
+                    correct: 1
+                },
+                {
+                    question: "If a required action is not explicit in the interface, what does rule number 3 recommend?",
+                    answers: ["Display a pop-up error message.", "Automate the default action triggered by the Enter key.", "Block the screen until the user guesses the action.", "Redirect the user to the help page."],
+                    correct: 1
+                },
+                {
+                    question: "What does the 'International Sensitivity' guideline refer to?",
+                    answers: ["The hardware's ability to function at different voltages.", "That prototypes should have editorial and visual content focused on a global/international vision.", "To avoid using any text in the interface.", "To use only servers located in international zones."],
+                    correct: 1
+                },
+                {
+                    question: "The 'Universal Accessibility' guideline implies that the product should be useful for:",
+                    answers: ["Only tech-savvy users.", "Only users who pay for the premium version.", "The typical user and also for users with any type of disability.", "System administrators exclusively."],
+                    correct: 2
+                },
+                {
+                    question: "What is sought with the guideline 'The user must be in control'?",
+                    answers: ["That the user can reprogram the software.", "That the user feels they control their interaction and receive the feedback/responses they expect.", "That the system makes all decisions for the user.", "That the user has access to the server database."],
+                    correct: 1
+                },
+                {
+                    question: "How does the material define 'Minimization of cognitive load'?",
+                    answers: ["The reduction of the computer's RAM usage.", "The user's perception that they can achieve their goal easily each time they try to perform the task again.", "The elimination of all images so there is only text.", "The use of dark colors to rest the eyes."],
+                    correct: 1
+                },
+                {
+                    question: "What is the purpose of the 'Satisfaction' guideline?",
+                    answers: ["Guarantee that the user buys the product.", "Measure satisfaction to make corrections in future iterations and achieve a satisfactory experience.", "Make the user smile whenever they use the application.", "Send automatic thank you emails."],
+                    correct: 1
+                },
+                {
+                    question: "In the design guidelines prioritization table (Worksheet 9.1), how is 'Fitts' Law' classified?",
+                    answers: ["Visual Design Guide (Organizational).", "User Interface Guide (Organizational).", "User Interface Guide (Directional).", "Visual Design Guide (Directional)."],
+                    correct: 2
+                },
+                {
+                    question: "According to the same prioritization table, is 'Typographic structure' a directional or organizational guide?",
+                    answers: ["Directional.", "Organizational.", "Performance.", "Accessibility."],
+                    correct: 1
+                },
+                {
+                    question: "Which of the following is NOT a Visual Design Guide according to the material?",
+                    answers: ["Rhythm and pattern.", "Unity and variety.", "Progressive disclosure.", "Balance."],
+                    correct: 2
+                },
+                {
+                    question: "What step immediately precedes 'Formulate criteria' in the Step-by-Step Guidelines?",
+                    answers: ["Finalize criteria.", "Review Guidelines.", "Create the prototype.", "Specify design rationale."],
+                    correct: 1
+                },
+                {
+                    question: "Moving to Topic 5.2 (Create the design), what is required as the main 'input' for Step 4: Create the prototype?",
+                    answers: ["Only the client's budget.", "Prioritized requirements, chosen method, selected tool and design criteria.", "The final source code of the application.", "Legal approval of the contract."],
+                    correct: 1
+                },
+                {
+                    question: "What special characteristic does Step 4 (Create the prototype) have with respect to the general process?",
+                    answers: ["It is the step where previous phases are ignored.", "It is an optional step.", "It is the step where everything reviewed up to that point converges.", "It is the step exclusive to backend programmers."],
+                    correct: 2
+                },
+                {
+                    question: "As a starting point for creating the prototype in Step 4, what elements are suggested to use?",
+                    answers: ["A blank canvas without guides.", "Blocked functional regions and detailed elements on the high-priority screen.", "Screenshots from the competition.", "Generic internet templates without modification."],
+                    correct: 1
+                },
+                {
+                    question: "What is the goal of Step 5: Specify design rationale?",
+                    answers: ["Calculate the man-hour cost.", "Establish the justification for the design based on objectives and requirements before delivering the prototype to stakeholders.", "Write the final user manual.", "Compress prototype files."],
+                    correct: 1
+                },
+                {
+                    question: "What does the justification generated in Step 5 ensure?",
+                    answers: ["That the prototype is aesthetically perfect.", "That requirements and objectives have been met.", "That the code is bug-free.", "That the prototype will work in all browsers."],
+                    correct: 1
+                },
+                {
+                    question: "In the context of Visual Guidelines, what pair of attributes is used to ensure a balanced but interesting design?",
+                    answers: ["Red and Blue.", "Unity and variety.", "Large and Small.", "Text and Image."],
+                    correct: 1
+                },
+                {
+                    question: "If a designer decides to visually group related elements so the user understands their relationship, what visual guideline is being applied?",
+                    answers: ["Logical grouping.", "Progressive disclosure.", "International sensitivity.", "Fitts' Law."],
+                    correct: 0
+                },
+                {
+                    question: "According to the material, who do the shown design criteria help?",
+                    answers: ["Exclusively Project Managers.", "Developers and designers to create prototypes tailored to their capabilities.", "Only the marketing team.", "End users during the learning phase."],
+                    correct: 1
+                },
+                {
+                    question: "In the 'Required actions' guideline, how is a mandatory field (required field) usually indicated visually according to the visual example in the material?",
+                    answers: ["With an alert sound.", "With an asterisk (*).", "Making the field blink.", "Hiding the field."],
+                    correct: 1
+                },
+                {
+                    question: "What type of attribute does the 'Balance' guideline have in the prioritization table?",
+                    answers: ["Organizational.", "Directional.", "Structural.", "Temporal."],
+                    correct: 1
+                },
+                {
+                    question: "What concept is associated with the ability to navigate easily and effectively through the interface to perform a specific task?",
+                    answers: ["Aesthetics.", "Efficiency (Performance).", "Internationalization.", "Logical grouping."],
+                    correct: 1
+                },
+                {
+                    question: "If you decide to use a secondary window ('pop-up') to show detailed information only when the user requests it, what interface guideline are you applying?",
+                    answers: ["Fitts' Law.", "Progressive disclosure.", "Information flow.", "Typographic structure."],
+                    correct: 1
+                },
+                {
+                    question: "Which visual guideline has the 'Organizational' attribute and refers to the use of grids?",
+                    answers: ["Grid-based organization.", "Information flow.", "Rhythm and pattern.", "Balance."],
+                    correct: 0
+                },
+                {
+                    question: "When should design rationale (Step 5) be established?",
+                    answers: ["Before starting to program the final code, but after validating with the user.", "When the prototype version has been completed, before giving it to stakeholders.", "At the beginning of the project, before requirements gathering.", "During the software maintenance phase."],
+                    correct: 1
+                },
+                {
+                    question: "What elements are used to support the 'design rationale' in Step 5?",
+                    answers: ["The designer's personal opinions exclusively.", "The prototype objectives and requirements (business, functional, technical and usability).", "Current year fashion trends.", "The availability of programmers."],
+                    correct: 1
+                }
+            ],
+            6: [ // Chapter 6 - Review, Validation and Deployment
+                {
+                    question: "Context: A design team has finished the first iteration of a high-fidelity prototype. Before showing it to the external client, they decide to conduct an evaluation. According to the Topic 6.1 material, what is the immediate step and who should mainly participate?",
+                    answers: ["Conduct external validation with investors to ensure the budget.", "Execute an internal design review with the team and other internal stakeholder groups, including management and development.", "Deploy the design in a closed format (PDF) to prevent unauthorized modifications.", "Conduct a usability test with end users selected through a pre-qualification questionnaire."],
+                    correct: 1
+                },
+                {
+                    question: "Context: While planning the presentation for the design review, you must establish a clear agenda. What elements should be included in this agenda to send before the meeting?",
+                    answers: ["Introduction, background, technical requirements and detailed budget.", "Scenario, presentation, open forum and future steps.", "Participant list, statistical test results, iterations and closure.", "Audience definition, version objectives, expectations and design rationale."],
+                    correct: 1
+                },
+                {
+                    question: "Theory: In the context of internal design review (Worksheet 6.1), what action is necessary if it is detected that the prototype cannot be used effectively by the initially defined audience?",
+                    answers: ["Cancel the review and return to the wireframing phase.", "Change the delivery format to a 'closed' one to simplify interaction.", "Make adjustments to the audience definition in the worksheet.", "Ignore the difficulty and proceed with the narrative presentation."],
+                    correct: 2
+                },
+                {
+                    question: "Practice: You are preparing the design presentation. According to the tips for 'Step 4: How it will be presented', what structural elements should your presentation contain?",
+                    answers: ["Introductions, Background, Useful support, Requirements and assumptions.", "Competitor analysis, Budget, Schedule, Prototype.", "User validation, Bug list, Technical improvements, Conclusions.", "Executive summary, Live demo, Q&A, Acknowledgments."],
+                    correct: 0
+                },
+                {
+                    question: "Theory: What is the fundamental difference between 'Design Review' and 'Prototype Validation' according to the syllabus structure?",
+                    answers: ["Review is technical and validation is financial.", "Review is done with external actors and validation with the internal team.", "Review is internal (team/management) and validation is external (clients/users).", "There is no difference, they are synonyms in the DSI lifecycle."],
+                    correct: 2
+                },
+                {
+                    question: "Methodology: When planning external validation through Usability Testing, the first step is to develop a test plan. What is the second critical step to ensure the quality of the data obtained?",
+                    answers: ["Prepare a list of participant contacts.", "Prepare a questionnaire to pre-qualify participants (exact user definition).", "Provide a complete software prototype.", "Prepare validation documents and confidentiality agreements."],
+                    correct: 1
+                },
+                {
+                    question: "Theory: According to the 'Worksheet 12.1: Choose the evaluation method' table, which of the following tool and method combinations is considered 'very appropriate' (++) for an internal review?",
+                    answers: ["Paper.", "Card sorting.", "Coded in Customer Feedback.", "Surveys in Internal Reviews."],
+                    correct: 1
+                },
+                {
+                    question: "Analysis: You need to evaluate a 'Digital interactive' prototype. According to the evaluation method selection table, what validation method is 'very appropriate' (++)?",
+                    answers: ["Cognitive walkthroughs.", "Surveys.", "Usability Testing.", "Customer Feedback with blank models."],
+                    correct: 2
+                },
+                {
+                    question: "Procedure: Within the necessary steps for Usability Testing, what action corresponds to step number 8?",
+                    answers: ["Conduct a test session with a participant.", "Review and analyze the collected data.", "Prepare a contact list.", "Prepare a guide to provide participants with the context of use and objectives."],
+                    correct: 3
+                },
+                {
+                    question: "Scenario: After conducting usability testing (step 11), the design team is in the analysis phase (step 12). What should they synthesize in addition to design achievements?",
+                    answers: ["The budget spent on the test.", "Recommendations to improve the design.", "The participants' email list.", "The prototype's source code."],
+                    correct: 1
+                },
+                {
+                    question: "Theory: According to the cited source from Ann Doubleday et al. on design evaluation, what do the evolution of usability evaluation methods include besides standards and guidelines?",
+                    answers: ["Only automated A/B testing.", "Observation, control techniques, questionnaires, attitude checklists and expert evaluation.", "Code review and database optimization.", "Marketing and sales meetings."],
+                    correct: 1
+                },
+                {
+                    question: "Decision Making: A team decides to iterate on the design. According to the material on 'Iterating the design', what factors does any additional need in prototyping depend on?",
+                    answers: ["Exclusively on the client's budget.", "On the degree of success achieved in testing, time, resources and team commitment.", "On the server technology chosen for deployment.", "On the amount of 'bugs' found in the final code."],
+                    correct: 1
+                },
+                {
+                    question: "Theory: In what situations should iterating on the design be especially considered according to the teaching material?",
+                    answers: ["When the project has an unlimited budget.", "If it is a research exploration or a new product/service.", "When the client doesn't know what they want.", "Only when server load tests fail."],
+                    correct: 1
+                },
+                {
+                    question: "Planning: What elements must the iteration plan contain to be effective?",
+                    answers: ["A generic Gantt chart without priorities.", "The articulated definition and prioritization of problems, clear steps and resolution objectives.", "An unfiltered list of user complaints.", "New legal contracts with developers."],
+                    correct: 1
+                },
+                {
+                    question: "Deployment: In the 'Design deployment' phase, what is the main objective of handover planning?",
+                    answers: ["Ensure that the development team signs the contract.", "Show the focus on design objectives and that the prototype can be used effectively.", "Remove all interactive features to save costs.", "Conduct one last usability test with end users."],
+                    correct: 1
+                },
+                {
+                    question: "Strategy: When deciding the form of prototype delivery during deployment, what are the two main strategies compared in the material?",
+                    answers: ["Analog Vs Digital.", "Open Vs Closed.", "Free Vs Paid.", "Local Vs In the cloud."],
+                    correct: 1
+                },
+                {
+                    question: "Theory: What characteristic defines an 'Open' delivery format?",
+                    answers: ["The design is frozen and cannot be edited (e.g. PDF).", "The design can be modified to reflect changes resulting from the handover.", "The design is Open Source for the general public.", "The design does not require technical specifications."],
+                    correct: 1
+                },
+                {
+                    question: "Practice: If you decide to use a 'Closed' delivery strategy to keep specifications intact, what type of document does the material recommend?",
+                    answers: ["An editable Photoshop file.", "A document with frozen design, such as PDF.", "An oral presentation without visual support.", "A Git code repository with full access."],
+                    correct: 1
+                },
+                {
+                    question: "Communication: For successful communication with collaborators during deployment, the material suggests having a specific assigned role and:",
+                    answers: ["Being up to date with the rationale, requirements, intent and details.", "Avoiding any contact with the development team.", "Delegating all responsibility to the Project Manager.", "Knowing how to program in the product's final language."],
+                    correct: 0
+                },
+                {
+                    question: "Strategy: Regarding the 'Narrative Vs Interactive' delivery forms, when is it better to present concepts in narrative presentation format?",
+                    answers: ["When the audience already knows the project thoroughly.", "When the audience is tech-savvy.", "When the audience has no money invested in the design or it is their first contact.", "When exhaustive technical validation is required."],
+                    correct: 2
+                },
+                {
+                    question: "Management: After the design handover, issues arise that must be managed. What impact do 'Functional requirements and assumptions' have?",
+                    answers: ["They only affect the marketing budget.", "Changes affect interaction design, as well as prototype design.", "They are irrelevant once the visual design is approved.", "They exclusively affect the application backend."],
+                    correct: 1
+                },
+                {
+                    question: "Evaluation: When evaluating external validation methods, if the 'Wizard of Oz' technique is used, what is its suitability level according to Worksheet 12.1?",
+                    answers: ["Not applicable (NA).", "Very appropriate (++).", "Acceptable (-).", "Not practical (--)."],
+                    correct: 1
+                },
+                {
+                    question: "Procedure: What step of usability testing involves 'Conducting validation in a predetermined number of scheduled sessions'?",
+                    answers: ["Step 1.", "Step 9.", "Step 11.", "Step 14."],
+                    correct: 2
+                },
+                {
+                    question: "Deployment: What should be done with 'Design guidelines' before presenting the prototype in the deployment phase?",
+                    answers: ["They should be improvised during the meeting.", "They should be well defined, justified and documented.", "They should be removed to avoid confusing the client.", "They should be written exclusively by developers."],
+                    correct: 1
+                },
+                {
+                    question: "Methodology: In the context of internal review (Step 1 of the design cycle), where has the participating audience been defined?",
+                    answers: ["In Worksheet 6.1.", "In the development contract.", "In the external validation meeting.", "In the source code."],
+                    correct: 0
+                },
+                {
+                    question: "Validation: What elements are used to achieve validation by external actors according to the text?",
+                    answers: ["Financial and legal audits.", "Usability testing, focus groups and evaluation sessions.", "Code compilations and unit tests.", "Internal review meetings exclusively."],
+                    correct: 1
+                },
+                {
+                    question: "Deployment: What should be well documented regarding 'Technical requirements and assumptions' during post-handover management?",
+                    answers: ["Technical feasibility.", "The color of buttons.", "The server name.", "The developers' schedule."],
+                    correct: 0
+                },
+                {
+                    question: "Planning: Which element is NOT part of the tips for establishing an agenda in step 4 of internal review?",
+                    answers: ["Scenario.", "Presentation.", "Detailed budget.", "Open forum."],
+                    correct: 2
+                },
+                {
+                    question: "Evaluation: According to Worksheet 12.1, how appropriate is the use of 'Video' for an 'External Review'?",
+                    answers: ["Not applicable (NA).", "Very appropriate (++).", "Acceptable (-).", "Inappropriate (+)."],
+                    correct: 1
+                },
+                {
+                    question: "Evaluation: For what evaluation method is the use of 'Paper' 'very appropriate' (++) according to Worksheet 12.1?",
+                    answers: ["Internal Reviews.", "Usability Testing.", "Surveys.", "Cognitive walkthroughs."],
+                    correct: 1
+                },
+                {
+                    question: "Deployment: What skill is necessary to communicate with collaborators during design deployment?",
+                    answers: ["Be able to handle the project accounting.", "Be able to understand how the transition from design to development occurs.", "Be able to ignore technical limitations.", "Be able to impose the design without changes."],
+                    correct: 1
+                },
+                {
+                    question: "Validation: What step of Usability Testing involves 'Providing a software prototype to validate the test'?",
+                    answers: ["Step 2.", "Step 5.", "Step 9.", "Step 13."],
+                    correct: 2
+                },
+                {
+                    question: "Theory: In issue management after handover, what should 'Usability requirements and assumptions' be measured against?",
+                    answers: ["Against the designer's preferences.", "Against user needs.", "Against obsolete hardware capabilities.", "Against the developers' available time."],
+                    correct: 1
+                },
+                {
+                    question: "Concept: What does the 'Open forum' imply within the design review agenda?",
+                    answers: ["An online space where anyone can comment.", "A part of the in-person meeting scheduled in the agenda.", "A support ticket system.", "A corporate social network."],
+                    correct: 1
+                },
+                {
+                    question: "Evaluation: According to Worksheet 12.1, which tool has a rating of NA (not applicable) for 'Usability Testing'?",
+                    answers: ["Paper.", "Wizard of Oz.", "Card sorting.", "Digital interactive."],
+                    correct: 2
+                },
+                {
+                    question: "Procedure: Before conducting the test session with a participant (Step 10), what should have been prepared according to Step 3?",
+                    answers: ["The final results report.", "A list of participant contacts.", "The final user manual.", "The invoice for the client."],
+                    correct: 1
+                },
+                {
+                    question: "Deployment: What is meant by a 'transition period' in design deployment?",
+                    answers: ["The time it takes for the server to restart.", "A well-planned period that actively involves the entire team for effective use of the prototype.", "The design team's vacation time after delivery.", "The interval between paper and digital design."],
+                    correct: 1
+                },
+                {
+                    question: "Validation: What is the last step (Step 14) listed for the Usability Testing strategy?",
+                    answers: ["Pay the participants.", "Prepare a presentation of validation results, successes and improvements.", "Delete user data.", "Archive the project permanently."],
+                    correct: 1
+                },
+                {
+                    question: "Internal Review: What elements make up the 'Design and prototype construction cycle' prior to review, according to Step 1?",
+                    answers: ["Define audience, objectives, expectations, presentation method and design rationale.", "Validate, iterate, charge and close.", "Program, test, deploy and maintain.", "Sketch, paint, print and bind."],
+                    correct: 0
+                },
+                {
+                    question: "Comparative Analysis: According to Worksheet 12.1, which is the only tool rated as 'very appropriate' (++) for all the following methodologies: Internal Reviews, External Reviews and Peer Reviews?",
+                    answers: ["Paper.", "Video.", "Story board.", "Coded."],
+                    correct: 1
+                }
+            ],
+            7: [ // Chapter 7 - Prototyping with Office
+                {
+                    question: "According to the material, what is the main strategic reason for using the Office suite as a prototyping tool in a business environment?",
+                    answers: ["They have graphic rendering capabilities superior to dedicated design tools.", "They are open source and allow modifying the software core to adapt to design.", "They enable collaboration of a multidisciplinary team (analysts, managers, developers) due to their omnipresence and widespread mastery.", "They include by default specific widget libraries for iOS and Android."],
+                    correct: 2
+                },
+                {
+                    question: "Analyzing Table 23.1 on common MS Office characteristics, what functional limitation does Excel have compared to PowerPoint in terms of animation?",
+                    answers: ["Excel does not allow any type of movement or interaction simulation.", "Excel lacks native animation features, but can simulate them by linking multiple spreadsheets.", "Excel only allows animations if the file is exported to HTML format.", "Excel has the same animation features as PowerPoint, but they are harder to access."],
+                    correct: 1
+                },
+                {
+                    question: "Within the Word prototyping methodology described in the document, what specific activities correspond to 'Step 1: Prepare the document'?",
+                    answers: ["Define the graphic area and the text area.", "Configure the page (Page set) and define styles (Styles).", "Add callouts and widgets.", "Write textual descriptions for each element."],
+                    correct: 1
+                },
+                {
+                    question: "What is considered a significant disadvantage when using Microsoft Word for GUI design according to the text?",
+                    answers: ["The lack of a spell checker for interface texts.", "The inability to use custom colors or RGB palettes.", "The frustration that exact graphic placement and pagination handling can generate.", "The impossibility of easily distributing the file to other team members."],
+                    correct: 2
+                },
+                {
+                    question: "In the context of 'Step 3: Wireframe design', what elements are integrated in this phase?",
+                    answers: ["Margin configuration and font styles.", "Text areas and general graphic areas.", "Graphic boxes, labeling, callouts and widgets.", "Detailed textual documentation of functionality."],
+                    correct: 2
+                },
+                {
+                    question: "Considering the advantages of Word for prototyping, how does the text describe the learning curve for users?",
+                    answers: ["Steep, due to the complexity of hidden drawing tools.", "Moderate, requiring a prior graphic design course.", "Nonexistent or not steep, since almost everyone has experience using it.", "Variable, depending on whether the Mac or Windows version is used."],
+                    correct: 2
+                },
+                {
+                    question: "What feature present in Excel is NOT available (or marked as 'No') in Word or PowerPoint according to Table 23.1?",
+                    answers: ["Grid cells.", "Graphic manipulation.", "Graphic import.", "Use of auto shapes."],
+                    correct: 0
+                },
+                {
+                    question: "According to the workflow presented for Word, what is the main purpose of 'Step 4'?",
+                    answers: ["Export the document to PDF for review.", "Perform textual documentation through descriptions for each 'callout'.", "Define the final color palette of the product.", "Program macros to simulate interaction."],
+                    correct: 1
+                },
+                {
+                    question: "Why does the text suggest that pagination in Word is a limitation for interface design?",
+                    answers: ["Because Word only allows a limited number of pages per document.", "Because modern user interfaces do not use the page concept.", "Because text flows from one page to the next (document concept), which differs from placing static screens one on top of another.", "Because pagination prevents the use of internal hyperlinks."],
+                    correct: 2
+                },
+                {
+                    question: "According to the exposed theory, what feature of Word facilitates the rapid creation of textual prototypes and content correction?",
+                    answers: ["The ability to automatically generate clean HTML code.", "Advanced text animation tools.", "Find and replace functions, and spell checker.", "Integration with SQL databases."],
+                    correct: 2
+                },
+                {
+                    question: "In 'Step 2: Begin framework', what visual or structural distinction is established?",
+                    answers: ["Primary colors are separated from secondary ones.", "The graphic area versus the text area is defined.", "The page's source code is written.", "Global navigation hyperlinks are established."],
+                    correct: 1
+                },
+                {
+                    question: "According to Table 23.1, which of the following position control features is NOT present in Word or PowerPoint, but is in Excel?",
+                    answers: ["Easy position control.", "Find replace.", "Align graphics.", "Grid cells."],
+                    correct: 0
+                },
+                {
+                    question: "The document mentions that Office applications allow providing different levels of fidelity. What does this mean in the prototyping context?",
+                    answers: ["That only low-fidelity prototypes (black and white sketches) can be made.", "That each application has features that support different fidelities and prototype characteristics.", "That fidelity depends exclusively on the quality of the monitor where it is viewed.", "That Office automatically converts sketches to high fidelity."],
+                    correct: 1
+                },
+                {
+                    question: "What visual element is used in 'Step 3' and in the 'Step 4' documentation to link textual explanations with wireframe parts?",
+                    answers: ["Web hyperlinks.", "Callouts.", "Standard footnotes.", "Hidden comments."],
+                    correct: 1
+                },
+                {
+                    question: "Regarding the functionality of 'Floating table cells' in Table 23.1, what is the situation of the three applications?",
+                    answers: ["Word and PowerPoint: Yes / Excel: No.", "Word and Excel: Yes / PowerPoint: No.", "All three applications: Yes.", "All three applications: No."],
+                    correct: 0
+                },
+                {
+                    question: "What role do 'Styles' play in Step 1 of the Word prototyping methodology?",
+                    answers: ["They are not necessary, everything can be formatted manually.", "They are a fundamental part of document preparation to ensure consistency.", "They are used only for final HTML export.", "They serve to animate transitions between pages."],
+                    correct: 1
+                },
+                {
+                    question: "What distribution advantage does using prototypes made in Word offer?",
+                    answers: ["They can be easily distributed to other team members due to the large installed user base.", "They are automatically distributed to the Microsoft cloud without user intervention.", "They can be converted into standalone executables (.exe).", "They require a special viewer that is free."],
+                    correct: 0
+                },
+                {
+                    question: "In the visual Wireframe examples shown in the document, what type of interface elements are represented?",
+                    answers: ["3D models and complex textures.", "Structural elements such as Global Navigation, Search, and content areas.", "Java and C++ source code.", "Embedded videos and Flash animations."],
+                    correct: 1
+                },
+                {
+                    question: "What statement is true about 'Presentation mode' according to Table 23.1?",
+                    answers: ["Only PowerPoint has a real presentation mode; Word and Excel simulate a full-screen mode.", "All three applications have identical presentation modes.", "Excel has the best presentation mode for graphic prototypes.", "Word does not allow any full-screen visualization."],
+                    correct: 0
+                },
+                {
+                    question: "How is it justified in the text that Office applications, used by accountants and administrators, are useful for prototyping?",
+                    answers: ["Because they are the cheapest tools on the market.", "Because they allow advanced programming in Python.", "Because they are a standard feature in business computers and most people have mastery of them.", "Because they were originally designed by graphic designers for graphic designers."],
+                    correct: 2
+                }
+            ]
+        };
+
+        // State management
+        let state = {
+            mode: 'learning',
+            currentChapter: null,
+            currentQuestion: 0,
+            score: 0,
+            correctCount: 0,
+            incorrectCount: 0,
+            chapterScores: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0}, // Score per chapter (0-4 points)
+            chapterProgress: {1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}},
+            chapterStats: {1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}, // Track per-session stats
+            userAnswers: [],
+            answered: false,
+            questionStartTime: null,
+            totalQuestionTime: 0,
+            questionsAnswered: 0,
+            streak: 0,
+            lastStudyDate: null,
+            reviewMode: false,
+            mistakeQuestions: [], // Questions answered incorrectly
+            isRandomQuiz: false,
+            randomQuestions: [], // For random quiz mode
+            progressHistory: [] // Detailed history of all quiz sessions
+        };
+
+        let timerInterval = null;
+        let sessionStartTime = null;
+
+        // Load saved state
+        function loadState() {
+            const saved = localStorage.getItem('quizAppState');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                state = {...state, ...savedState};
+                updateStats();
+                updateStreak();
+            }
+        }
+
+        // Save state
+        function saveState() {
+            localStorage.setItem('quizAppState', JSON.stringify(state));
+            showSaveIndicator();
+        }
+
+        // Auto-save every 5 seconds
+        setInterval(saveState, 5000);
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+        }
+
+        // Update streak
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const lastDate = state.lastStudyDate;
+
+            if (!lastDate) {
+                state.streak = 1;
+                state.lastStudyDate = today;
+            } else if (lastDate !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastDate === yesterday.toDateString()) {
+                    state.streak++;
+                } else {
+                    state.streak = 1;
+                }
+                state.lastStudyDate = today;
+            }
+
+            document.getElementById('streakBadge').textContent = `🔥 ${state.streak} ${state.streak === 1 ? 'zi' : 'zile'}`;
+            saveState();
+        }
+
+        // Timer functions
+        function startQuestionTimer() {
+            state.questionStartTime = Date.now();
+            sessionStartTime = sessionStartTime || Date.now();
+            document.getElementById('timerDisplay').classList.add('active');
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopQuestionTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (state.questionStartTime) {
+                const timeSpent = Math.floor((Date.now() - state.questionStartTime) / 1000);
+                state.totalQuestionTime += timeSpent;
+                state.questionsAnswered++;
+                updateAvgTime();
+            }
+        }
+
+        function updateTimer() {
+            if (!sessionStartTime) return;
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `⏱️ ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateAvgTime() {
+            if (state.questionsAnswered > 0) {
+                const avg = Math.round(state.totalQuestionTime / state.questionsAnswered);
+                document.getElementById('avgTime').textContent = `${avg}s`;
+            }
+        }
+
+        // Set mode
+        function setMode(mode) {
+            state.mode = mode;
+            state.reviewMode = (mode === 'review');
+            document.getElementById('learningModeBtn').classList.toggle('active', mode === 'learning');
+            document.getElementById('examModeBtn').classList.toggle('active', mode === 'exam');
+            document.getElementById('reviewModeBtn').classList.toggle('active', mode === 'review');
+            saveState();
+        }
+
+        // Initialize chapters
+        function initChapters() {
+            const grid = document.getElementById('chaptersGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 7; i++) {
+                const progress = calculateChapterProgress(i);
+                const mistakes = countChapterMistakes(i);
+                const chapterScore = state.chapterScores[i] || 0;
+                const card = document.createElement('div');
+                card.className = 'chapter-card';
+                card.onclick = () => startChapter(i);
+                
+                let mistakeInfo = mistakes > 0 ? `<div class="chapter-progress" style="color: #ff6b6b;">❌ ${mistakes} mistakes</div>` : '';
+                
+                // Chapter 7 has 20 questions, others have 40
+                const totalQuestions = (i === 7) ? 20 : 40;
+                
+                card.innerHTML = `
+                    <div class="chapter-title">Chapter ${i}</div>
+                    <div class="chapter-progress" style="font-size: 1.3em; color: #00d9ff; font-weight: bold;">⭐ ${chapterScore.toFixed(1)}/4.0 points</div>
+                    <div class="chapter-progress">${progress.answered}/${totalQuestions} questions</div>
+                    <div class="chapter-progress" style="color: #00ff88;">✓ Correct: ${progress.correct}</div>
+                    ${mistakeInfo}
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${(progress.answered / totalQuestions) * 100}%"></div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            }
+        }
+
+        function calculateChapterProgress(chapter) {
+            const progress = state.chapterProgress[chapter] || {};
+            const answered = Object.keys(progress).length;
+            const correct = Object.values(progress).filter(v => v === true).length;
+            return { answered, correct };
+        }
+
+        function countChapterMistakes(chapter) {
+            return state.mistakeQuestions.filter(q => q.chapter === chapter).length;
+        }
+
+        // Start chapter - FIX: Reset session stats to prevent score accumulation
+        function startChapter(chapter) {
+            state.currentChapter = chapter;
+            state.currentQuestion = 0;
+            state.userAnswers = [];
+            state.answered = false;
+            state.isRandomQuiz = false;
+            
+            // IMPORTANT FIX: Reset session stats for this chapter
+            if (!state.chapterStats[chapter]) {
+                state.chapterStats[chapter] = {};
+            }
+            state.chapterStats[chapter] = {
+                sessionScore: 0,
+                sessionCorrect: 0,
+                sessionIncorrect: 0,
+                startTime: Date.now()
+            };
+            
+            // Update streak on study
+            updateStreak();
+            
+            // Start timer
+            sessionStartTime = Date.now();
+            startQuestionTimer();
+            
+            // Update score display
+            updateScoreDisplay();
+            
+            document.getElementById('chaptersView').style.display = 'none';
+            document.getElementById('quizContainer').classList.add('active');
+            document.getElementById('resultsContainer').classList.remove('active');
+            
+            // Show/hide review mode indicator
+            document.getElementById('reviewModeIndicator').style.display = 
+                state.reviewMode ? 'block' : 'none';
+            
+            loadQuestion();
+        }
+
+        // Start Random Quiz - NEW FEATURE
+        function startRandomQuiz() {
+            state.isRandomQuiz = true;
+            state.currentChapter = 'random';
+            state.currentQuestion = 0;
+            state.userAnswers = [];
+            state.answered = false;
+            
+            // Generate 40 random questions from all chapters
+            state.randomQuestions = [];
+            const allQuestions = [];
+            
+            // Collect all questions from all chapters
+            for (let chapter = 1; chapter <= 7; chapter++) {
+                const chapterQuestions = quizData[chapter] || [];
+                chapterQuestions.forEach((q, index) => {
+                    allQuestions.push({
+                        ...q,
+                        originalChapter: chapter,
+                        originalIndex: index
+                    });
+                });
+            }
+            
+            // Shuffle and select 40 questions
+            const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+            state.randomQuestions = shuffled.slice(0, Math.min(40, shuffled.length));
+            
+            if (state.randomQuestions.length === 0) {
+                alert('No questions in chapters. Add questions first!');
+                return;
+            }
+            
+            // Reset session stats for random quiz
+            state.chapterStats['random'] = {
+                sessionScore: 0,
+                sessionCorrect: 0,
+                sessionIncorrect: 0,
+                startTime: Date.now()
+            };
+            
+            // Update streak on study
+            updateStreak();
+            
+            // Start timer
+            sessionStartTime = Date.now();
+            startQuestionTimer();
+            
+            // Update score display
+            document.getElementById('scoreLabel').textContent = 'Random Quiz';
+            document.getElementById('totalScore').textContent = '0/40';
+            
+            document.getElementById('chaptersView').style.display = 'none';
+            document.getElementById('quizContainer').classList.add('active');
+            document.getElementById('resultsContainer').classList.remove('active');
+            document.getElementById('reviewModeIndicator').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        // Update score display
+        function updateScoreDisplay() {
+            if (state.isRandomQuiz) {
+                document.getElementById('scoreLabel').textContent = 'Random Quiz';
+                document.getElementById('totalScore').textContent = '0/40';
+            } else if (state.currentChapter) {
+                const score = state.chapterScores[state.currentChapter] || 0;
+                document.getElementById('scoreLabel').textContent = `Chapter ${state.currentChapter}`;
+                document.getElementById('totalScore').textContent = `${score.toFixed(1)}/4.0`;
+            }
+        }
+
+        // Load question
+        function loadQuestion() {
+            let questions;
+            
+            // Handle random quiz mode
+            if (state.isRandomQuiz) {
+                questions = state.randomQuestions;
+            } else {
+                questions = quizData[state.currentChapter];
+                if (!questions || questions.length === 0) {
+                    alert('Chapter contains no questions. Please add questions!');
+                    exitQuiz();
+                    return;
+                }
+
+                // Filter for review mode
+                if (state.reviewMode) {
+                    const mistakesForChapter = state.mistakeQuestions.filter(q => q.chapter === state.currentChapter);
+                    if (mistakesForChapter.length === 0) {
+                        alert('Congratulations! You have no mistakes in this chapter!');
+                        exitQuiz();
+                        return;
+                    }
+                    questions = mistakesForChapter.map(m => questions[m.questionIndex]);
+                }
+            }
+
+            if (state.currentQuestion >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const q = questions[state.currentQuestion];
+            state.answered = false;
+            
+            // Start timer for this question
+            startQuestionTimer();
+            
+            // Display question number and chapter info
+            if (state.isRandomQuiz) {
+                document.getElementById('questionNumber').textContent = `Question ${state.currentQuestion + 1}/${questions.length}`;
+                document.getElementById('currentChapter').textContent = `From Chapter ${q.originalChapter || '?'}`;
+            } else {
+                document.getElementById('questionNumber').textContent = `Question ${state.currentQuestion + 1}/${questions.length}`;
+                document.getElementById('currentChapter').textContent = `Chapter ${state.currentChapter}`;
+            }
+            
+            document.getElementById('questionText').textContent = q.question;
+            
+            const grid = document.getElementById('answersGrid');
+            grid.innerHTML = '';
+            
+            q.answers.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = `${String.fromCharCode(65 + index)}. ${answer}`;
+                btn.onclick = () => selectAnswer(index);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        // Select answer
+        function selectAnswer(index) {
+            if (state.answered) return;
+
+            // Stop timer for this question
+            stopQuestionTimer();
+
+            let questions, q, currentChapter;
+            
+            // Get the correct question based on mode
+            if (state.isRandomQuiz) {
+                questions = state.randomQuestions;
+                q = questions[state.currentQuestion];
+                currentChapter = 'random';
+            } else {
+                questions = quizData[state.currentChapter];
+                q = questions[state.currentQuestion];
+                currentChapter = state.currentChapter;
+            }
+            
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach(btn => btn.classList.add('disabled'));
+            buttons[index].classList.add('selected');
+
+            const isCorrect = index === q.correct;
+            state.userAnswers.push(index);
+
+            // Calculate score per chapter: 40 questions = 4 points, so 0.1 per correct, -0.033 per incorrect
+            const pointsPerCorrect = 0.1; // 40 * 0.1 = 4 points maximum
+            const pointsPerIncorrect = 0.033;
+
+            if (state.mode === 'learning' || state.mode === 'review') {
+                state.answered = true;
+                
+                const sessionStats = state.chapterStats[currentChapter];
+                
+                if (isCorrect) {
+                    buttons[index].classList.add('correct');
+                    sessionStats.sessionScore += pointsPerCorrect;
+                    sessionStats.sessionCorrect++;
+                    
+                    // Update chapter score (only for non-random quiz)
+                    if (!state.isRandomQuiz) {
+                        state.chapterScores[currentChapter] = Math.min(4, (state.chapterScores[currentChapter] || 0) + pointsPerCorrect);
+                        updateScoreDisplay();
+                    }
+                    
+                    showFeedback(true, `✅ Correct! +${pointsPerCorrect.toFixed(2)} points`);
+                    
+                    // Remove from mistakes if it was there
+                    if (!state.isRandomQuiz) {
+                        state.mistakeQuestions = state.mistakeQuestions.filter(
+                            m => !(m.chapter === currentChapter && m.questionIndex === state.currentQuestion)
+                        );
+                    }
+                } else {
+                    buttons[index].classList.add('incorrect');
+                    buttons[q.correct].classList.add('correct');
+                    sessionStats.sessionScore -= pointsPerIncorrect;
+                    sessionStats.sessionIncorrect++;
+                    
+                    // Update chapter score (only for non-random quiz)
+                    if (!state.isRandomQuiz) {
+                        state.chapterScores[currentChapter] = Math.max(0, (state.chapterScores[currentChapter] || 0) - pointsPerIncorrect);
+                        updateScoreDisplay();
+                    }
+                    
+                    showFeedback(false, `❌ Wrong! -${pointsPerIncorrect.toFixed(3)} points. Correct answer: ${String.fromCharCode(65 + q.correct)}`);
+                    
+                    // Add to mistakes for review (only for non-random quiz)
+                    if (!state.isRandomQuiz) {
+                        const mistake = {
+                            chapter: currentChapter,
+                            questionIndex: state.currentQuestion,
+                            timestamp: Date.now()
+                        };
+                        if (!state.mistakeQuestions.find(m => m.chapter === mistake.chapter && m.questionIndex === mistake.questionIndex)) {
+                            state.mistakeQuestions.push(mistake);
+                        }
+                    }
+                }
+
+                if (!state.isRandomQuiz) {
+                    state.chapterProgress[currentChapter][state.currentQuestion] = isCorrect;
+                }
+                updateStats();
+                document.getElementById('nextBtn').disabled = false;
+            } else {
+                // Exam mode - doar salvează răspunsul
+                setTimeout(() => {
+                    state.currentQuestion++;
+                    loadQuestion();
+                }, 300);
+            }
+
+            saveState();
+        }
+
+        function showFeedback(isCorrect, message) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback show ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.textContent = message;
+        }
+
+        // Next question
+        function nextQuestion() {
+            state.currentQuestion++;
+            loadQuestion();
+        }
+
+        // Show results - FIX: Use session stats to prevent accumulation
+        function showResults() {
+            stopQuestionTimer();
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            document.getElementById('timerDisplay').classList.remove('active');
+            
+            const currentChapter = state.isRandomQuiz ? 'random' : state.currentChapter;
+            const sessionStats = state.chapterStats[currentChapter];
+            
+            if (state.mode === 'exam') {
+                // Calculate exam results
+                const questions = state.isRandomQuiz ? state.randomQuestions : quizData[state.currentChapter];
+                const pointsPerCorrect = 0.1;
+                const pointsPerIncorrect = 0.033;
+                
+                questions.forEach((q, index) => {
+                    const isCorrect = state.userAnswers[index] === q.correct;
+                    if (isCorrect) {
+                        sessionStats.sessionScore += pointsPerCorrect;
+                        sessionStats.sessionCorrect++;
+                        
+                        if (!state.isRandomQuiz) {
+                            state.chapterScores[currentChapter] = Math.min(4, (state.chapterScores[currentChapter] || 0) + pointsPerCorrect);
+                        }
+                    } else {
+                        sessionStats.sessionScore -= pointsPerIncorrect;
+                        sessionStats.sessionIncorrect++;
+                        
+                        if (!state.isRandomQuiz) {
+                            state.chapterScores[currentChapter] = Math.max(0, (state.chapterScores[currentChapter] || 0) - pointsPerIncorrect);
+                        }
+                        
+                        // Add to mistakes
+                        if (!state.isRandomQuiz) {
+                            const mistake = {chapter: currentChapter, questionIndex: index, timestamp: Date.now()};
+                            if (!state.mistakeQuestions.find(m => m.chapter === mistake.chapter && m.questionIndex === mistake.questionIndex)) {
+                                state.mistakeQuestions.push(mistake);
+                            }
+                        }
+                    }
+                    if (!state.isRandomQuiz) {
+                        state.chapterProgress[currentChapter][index] = isCorrect;
+                    }
+                });
+                updateStats();
+            }
+
+            // Use session stats for display
+            const sessionTotal = sessionStats.sessionCorrect + sessionStats.sessionIncorrect;
+            const sessionPercentage = sessionTotal > 0 ? Math.round((sessionStats.sessionCorrect / sessionTotal) * 100) : 0;
+            
+            const totalTime = Math.floor((Date.now() - sessionStats.startTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+
+            const scoreText = state.isRandomQuiz 
+                ? `${sessionStats.sessionCorrect}/${sessionTotal} correct` 
+                : `${sessionStats.sessionScore.toFixed(2)}/4.0 points (this session)`;
+            
+            document.getElementById('finalScore').textContent = scoreText;
+            document.getElementById('resultCorrect').textContent = sessionStats.sessionCorrect;
+            document.getElementById('resultIncorrect').textContent = sessionStats.sessionIncorrect;
+            document.getElementById('resultPercentage').textContent = sessionPercentage + '%';
+
+            // Add time display
+            const resultsContainer = document.getElementById('resultsContainer');
+            let timeDisplay = resultsContainer.querySelector('.time-display');
+            if (!timeDisplay) {
+                timeDisplay = document.createElement('div');
+                timeDisplay.className = 'time-display';
+                timeDisplay.style.cssText = 'text-align: center; font-size: 1.2em; color: #00d9ff; margin: 20px 0;';
+                resultsContainer.querySelector('.result-card').appendChild(timeDisplay);
+            }
+            timeDisplay.textContent = `⏱️ Total Time: ${minutes}m ${seconds}s`;
+
+            // Save to progress history
+            saveProgressHistory(sessionStats, sessionPercentage, totalTime, sessionTotal);
+
+            document.getElementById('quizContainer').classList.remove('active');
+            document.getElementById('resultsContainer').classList.add('active');
+            saveState();
+        }
+
+        // Update stats
+        function updateStats() {
+            // Update score display based on current context
+            updateScoreDisplay();
+
+            let totalAnswered = 0;
+            let chaptersComplete = 0;
+            
+            for (let i = 1; i <= 7; i++) {
+                const answered = Object.keys(state.chapterProgress[i] || {}).length;
+                totalAnswered += answered;
+                // Chapter 7 has 20 questions, others have 40
+                const totalQuestions = (i === 7) ? 20 : 40;
+                if (answered === totalQuestions) chaptersComplete++;
+            }
+            
+            const totalPossibleQuestions = (6 * 40) + 20; // Chapters 1-6: 40 each, Chapter 7: 20 = 260 total
+            const globalProgress = Math.round((totalAnswered / totalPossibleQuestions) * 100);
+            document.getElementById('globalProgress').textContent = globalProgress + '%';
+            document.getElementById('chaptersComplete').textContent = `${chaptersComplete}/7`;
+        }
+
+        // Exit quiz
+        function exitQuiz() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            sessionStartTime = null;
+            document.getElementById('timerDisplay').classList.remove('active');
+            document.getElementById('quizContainer').classList.remove('active');
+            document.getElementById('resultsContainer').classList.remove('active');
+            document.getElementById('chaptersView').style.display = 'block';
+            initChapters();
+        }
+
+        function exitToChapters() {
+            exitQuiz();
+        }
+
+        function restartQuiz() {
+            startChapter(state.currentChapter);
+        }
+
+        // Progress History Functions
+        function saveProgressHistory(sessionStats, percentage, totalTime, questionCount) {
+            const historyEntry = {
+                timestamp: Date.now(),
+                date: new Date().toLocaleString('en-US'),
+                mode: state.mode,
+                chapter: state.isRandomQuiz ? 'Random Quiz' : `Chapter ${state.currentChapter}`,
+                correct: sessionStats.sessionCorrect,
+                incorrect: sessionStats.sessionIncorrect,
+                total: questionCount,
+                percentage: percentage,
+                score: sessionStats.sessionScore.toFixed(2),
+                duration: totalTime,
+                isRandomQuiz: state.isRandomQuiz
+            };
+
+            state.progressHistory.unshift(historyEntry); // Add at beginning (most recent first)
+            
+            // Keep only last 100 sessions to prevent excessive data
+            if (state.progressHistory.length > 100) {
+                state.progressHistory = state.progressHistory.slice(0, 100);
+            }
+
+            updateHistoryCount();
+            saveState();
+        }
+
+        function updateHistoryCount() {
+            const count = state.progressHistory.length;
+            document.getElementById('historyCount').textContent = `${count} ${count === 1 ? 'session' : 'sessions'}`;
+        }
+
+        function showProgressHistory() {
+            const modal = document.getElementById('historyModal');
+            const historyList = document.getElementById('historyList');
+            
+            if (state.progressHistory.length === 0) {
+                historyList.innerHTML = '<div class="no-history">📭 No completed sessions yet.<br>Start a quiz to see your progress!</div>';
+            } else {
+                let html = '';
+                state.progressHistory.forEach((entry, index) => {
+                    const minutes = Math.floor(entry.duration / 60);
+                    const seconds = entry.duration % 60;
+                    const modeClass = entry.isRandomQuiz ? 'random' : entry.mode;
+                    const modeText = entry.mode === 'learning' ? '📖 Learning' : 
+                                    entry.mode === 'exam' ? '📝 Exam' : 
+                                    entry.mode === 'review' ? '🔄 Review' : '🎲 Random';
+
+                    html += `
+                        <div class="history-item">
+                            <div class="history-item-header">
+                                <div class="history-date">${entry.date}</div>
+                                <div class="history-mode ${modeClass}">${modeText}</div>
+                            </div>
+                            <div style="margin-bottom: 12px; color: #00d9ff; font-weight: bold; font-size: 1.05em;">
+                                ${entry.chapter}
+                            </div>
+                            <div class="history-details">
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Result</div>
+                                    <div class="history-stat-value">${entry.percentage}%</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Correct</div>
+                                    <div class="history-stat-value" style="color: #00ff88;">${entry.correct}</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Wrong</div>
+                                    <div class="history-stat-value" style="color: #ff4444;">${entry.incorrect}</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Total</div>
+                                    <div class="history-stat-value">${entry.total}</div>
+                                </div>
+                                ${!entry.isRandomQuiz ? `
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Chapter Score</div>
+                                    <div class="history-stat-value">${entry.score}/4.0</div>
+                                </div>` : ''}
+                                <div class="history-stat">
+                                    <div class="history-stat-label">Duration</div>
+                                    <div class="history-stat-value">${minutes}m ${seconds}s</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                historyList.innerHTML = html;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeProgressHistory() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+
+        // Close modal on background click
+        document.getElementById('historyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProgressHistory();
+            }
+        });
+
+        // Initialize app
+        loadState();
+        initChapters();
+        updateStats();
+        updateStreak();
+        updateHistoryCount();
+    </script>
+</body>
+</html>
